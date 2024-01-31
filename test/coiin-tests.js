@@ -4,7 +4,7 @@ const {expect} = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Coiin", function () {
-    async function deployOneYearLockFixture() {
+    async function deployCoiinFixture() {
         // Contracts are deployed using the first signer/account by default
         const [owner, otherAccount] = await ethers.getSigners();
 
@@ -16,7 +16,7 @@ describe("Coiin", function () {
 
     describe("Withdraw", function () {
         it("Contract Pause", async function () {
-            const {coiin} = await loadFixture(deployOneYearLockFixture);
+            const {coiin} = await loadFixture(deployCoiinFixture);
 
             expect(await coiin.withdrawalsPaused()).to.equal(false);
             await coiin.pauseWithdrawals(true);
@@ -26,47 +26,46 @@ describe("Coiin", function () {
                 1,
                 Math.floor(new Date().getTime() / 1000),
                 1,
-                '0x00',
-            )).to.be.revertedWith("Contract Paused");
+                //'0x00',
+            )).to.be.revertedWithCustomError(coiin, "Coiin__ContractPaused");
         });
 
         it("Contract withdraw zero amount", async function () {
-            const {coiin} = await loadFixture(deployOneYearLockFixture);
+            const {coiin} = await loadFixture(deployCoiinFixture);
 
             await expect(coiin.withdraw(
                 0,
                 Math.floor(new Date().getTime() / 1000) + 10000,
                 1,
-                '0x00',
-            )).to.be.revertedWith("Minting zero tokens.");
+                //'0x00',
+            )).to.be.revertedWithCustomError(coiin, "Coiin__ZeroAmount");
         });
 
         it("Contract withdraw dup transaction", async function () {
-            const {coiin} = await loadFixture(deployOneYearLockFixture);
+            const {coiin} = await loadFixture(deployCoiinFixture);
 
             await expect(coiin.withdraw(
                 1,
                 Math.floor(new Date().getTime() / 1000) + 10000,
                 0, // Zero nonce is already marked as used
-                '0x00',
-            )).to.be.revertedWith("duplicate transaction found, start new request from Coiin");
+                //'0x00',
+            )).to.be.revertedWithCustomError(coiin, "Coiin__InvalidNonce");
 
         });
 
         it("Contract withdraw expired", async function () {
-            const {coiin} = await loadFixture(deployOneYearLockFixture);
+            const {coiin} = await loadFixture(deployCoiinFixture);
 
             await expect(coiin.withdraw(
                 1,
                 Math.floor(new Date().getTime() / 1000) - 1000,
                 1,
-                '0x00',
-            )).to.be.revertedWith("withdraw period expired");
-
+                //'0x00',
+            )).to.be.revertedWithCustomError(coiin, "Coiin__Expired");
         });
 
         // it("Contract withdraw not signed by coiin", async function () {
-        //     const {coiin} = await loadFixture(deployOneYearLockFixture);
+        //     const {coiin} = await loadFixture(deployCoiinFixture);
         //
         //     await expect(coiin.withdraw(
         //         1,
@@ -77,13 +76,13 @@ describe("Coiin", function () {
         // });
 
         it("Contract withdraw", async function () {
-            const {coiin, owner} = await loadFixture(deployOneYearLockFixture);
+            const {coiin, owner} = await loadFixture(deployCoiinFixture);
 
             await expect(coiin.withdraw(
                 '20000000000000000000000',
                 Math.floor(new Date().getTime() / 1000) + 10000,
                 1,
-                '0x00',
+                //'0x00',
             )).to.emit(coiin, "Transfer");
 
             let balance = await coiin.balanceOf(owner.getAddress())
@@ -96,12 +95,12 @@ describe("Coiin", function () {
                 '100000000000000000000',
                 Math.floor(new Date().getTime() / 1000) + 10000,
                 2,
-                '0x00',
-            )).to.be.revertedWith("exceeded withdraw account limit");
+                //'0x00',
+            )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit");
         });
 
         it("Contract withdraw history", async function () {
-            const {coiin, owner} = await loadFixture(deployOneYearLockFixture);
+            const {coiin, owner} = await loadFixture(deployCoiinFixture);
 
             let nonce = 1;
             const accounts = await ethers.getSigners();
@@ -110,7 +109,7 @@ describe("Coiin", function () {
                     '100000000000000000000',
                     Math.floor(new Date().getTime() / 1000) + 10000,
                     nonce,
-                    '0x00',
+                    //'0x00',
                 )).to.emit(coiin, "Transfer");
 
                 let balance = await coiin.balanceOf(account.getAddress())
@@ -125,10 +124,10 @@ describe("Coiin", function () {
 
             for (const account of accounts) {
                 await expect(coiin.connect(account).withdraw(
-                    '100000000000000000000',
+                    ethers.parseEther('100'),
                     (Math.floor(new Date().getTime() / 1000) + 60*60*25) + 10000,
                     nonce,
-                    '0x00',
+                    //'0x00',
                 )).to.emit(coiin, "Transfer");
 
                 let balance = await coiin.balanceOf(account.getAddress())

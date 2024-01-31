@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity 0.8.20;
 
 
 import "@thirdweb-dev/contracts/base/ERC20Base.sol";
@@ -7,7 +7,14 @@ import "./utils/CoiinECDSA.sol";
 
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
-
+error Coiin__ContractPaused();
+error Coiin__BalanceTooLow();
+error Coiin__ZeroAmount();
+error Coiin__InvalidNonce();
+error Coiin__Expired();
+error Coiin__MaxWithdrawAccountLimit();
+error Coiin__MaxWithdraLimit();
+error Coiin__MaxWithdrawClusterLimit();
 contract Coiin is ERC20Base {
     using CoiinECDSA for bytes32;
 
@@ -52,21 +59,21 @@ contract Coiin is ERC20Base {
         ownerAddr = msg.sender;
         multiSigAddr = msg.sender; // TODO: get this address
 
-        withdrawMaxLimit = 100_000 * 1e18;
-        withdrawMaxPeriod = 86_400; // 24 hrs
+        withdrawMaxLimit = 100_000 ether;
+        withdrawMaxPeriod = 1 days; // 24 hrs
 
-        withdrawAccountLimit = 20_000 * 1e18;
-        withdrawAccountPeriod = 86_400; // 24 hrs
+        withdrawAccountLimit = 20_000 ether;
+        withdrawAccountPeriod = 1 days; // 24 hrs
 
-        withdrawClusterLimit = 33_333 * 1e18;
-        withdrawClusterPeriod = 43_200; // 12 hrs
+        withdrawClusterLimit = 33_333 ether;
+        withdrawClusterPeriod = 12 hours; // 12 hrs
         withdrawClusterSize = 10;
 
         // Set 0 nonce for testing
         usedNonces[0] = true;
 
         // TODO: mint 100m coiin to pool address(s)
-        _mint(msg.sender, 100_000_000 * 1e18);
+        _mint(msg.sender, 100_000_000 ether);
     }
 
     modifier onlyMultiSig {
@@ -75,20 +82,24 @@ contract Coiin is ERC20Base {
     }
 
     function getWithdrawLimits() public view
-    returns (uint256 _withdrawMaxLimit,
+    returns (
+        uint256 _withdrawMaxLimit,
         uint256 _withdrawMaxPeriod,
         uint256 _withdrawAccountLimit,
         uint256 _withdrawAccountPeriod,
         uint256 _withdrawClusterLimit,
         uint256 _withdrawClusterPeriod,
-        uint256 _withdrawClusterSize) {
-        return (withdrawMaxLimit,
+        uint256 _withdrawClusterSize
+    ){
+        return (
+            withdrawMaxLimit,
             withdrawMaxPeriod,
             withdrawAccountLimit,
             withdrawAccountPeriod,
             withdrawClusterLimit,
             withdrawClusterPeriod,
-            withdrawClusterSize);
+            withdrawClusterSize
+        );
     }
 
     function mintTo(address, uint256) public pure override {
@@ -96,8 +107,7 @@ contract Coiin is ERC20Base {
     }
 
     function deposit(uint256 amount) external {
-        uint256 fromBalance = balanceOf(msg.sender);
-        require(amount < fromBalance, "not enough balance");
+        if (amount > balanceOf(msg.sender)) revert Coiin__BalanceTooLow();
         _burn(msg.sender, amount);
     }
 
@@ -159,11 +169,12 @@ contract Coiin is ERC20Base {
         uint256 nonce
 //        bytes memory sig
     ) public {
-        require(withdrawalsPaused == false, "Contract Paused");
-        require(amount != 0, "Minting zero tokens.");
-        require(!usedNonces[nonce], "duplicate transaction found, start new request from Coiin");
-        require(block.timestamp < expires, "withdraw period expired");
+        if (withdrawalsPaused == true) revert Coiin__ContractPaused();
+        if (amount <= 0) revert Coiin__ZeroAmount();
+        if (usedNonces[nonce]) revert Coiin__InvalidNonce();
+        if (block.timestamp >= expires) revert Coiin__Expired();
         checkWithdrawLimits(msg.sender, amount);
+
 
         usedNonces[nonce] = true;
 
@@ -183,7 +194,7 @@ contract Coiin is ERC20Base {
     }
 
     function checkWithdrawLimits(address account, uint256 amount) private {
-        require(amount <= withdrawAccountLimit, "exceeded withdraw account limit");
+        if (amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
 
         uint256 totalWithdraw = 0;
         uint256 accWithdraw = 0;
@@ -216,9 +227,9 @@ contract Coiin is ERC20Base {
             }
         }
 
-        require(totalWithdraw + amount <= withdrawMaxLimit, "exceeded max limit");
-        require(accWithdraw + amount <= withdrawAccountLimit, "exceeded withdraw account limit");
-        require(clusterWithdraw + amount <= withdrawClusterLimit, "exceeded withdraw cluster limit");
+        if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdraLimit();
+        if (accWithdraw + amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
+        if (clusterWithdraw + amount > withdrawClusterLimit) revert Coiin__MaxWithdrawClusterLimit();
     }
 
     function popWithdrawMint() private {
