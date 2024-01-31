@@ -47,6 +47,8 @@ contract Coiin is ERC20Base {
 
     constructor(
         address _defaultAdmin,
+        address _multiSigAddr,
+        address _initialMintTo,
         string memory _name,
         string memory _symbol)
     ERC20Base(
@@ -55,9 +57,8 @@ contract Coiin is ERC20Base {
     _symbol
     )
     {
-        withdrawSigner = msg.sender;
         ownerAddr = msg.sender;
-        multiSigAddr = msg.sender; // TODO: get this address
+        multiSigAddr = _multiSigAddr;
 
         withdrawMaxLimit = 100_000 ether;
         withdrawMaxPeriod = 1 days; // 24 hrs
@@ -69,11 +70,7 @@ contract Coiin is ERC20Base {
         withdrawClusterPeriod = 12 hours; // 12 hrs
         withdrawClusterSize = 10;
 
-        // Set 0 nonce for testing
-        usedNonces[0] = true;
-
-        // TODO: mint 100m coiin to pool address(s)
-        _mint(msg.sender, 100_000_000 ether);
+        _mint(_initialMintTo, 100_000_000 ether);
     }
 
     modifier onlyMultiSig {
@@ -102,6 +99,7 @@ contract Coiin is ERC20Base {
         );
     }
 
+    // Disabled
     function mintTo(address, uint256) public pure override {
         revert("");
     }
@@ -111,7 +109,11 @@ contract Coiin is ERC20Base {
         _burn(msg.sender, amount);
     }
 
-    function changeMultiSig(address _multiSigAddr) external onlyMultiSig {
+    function setWithdrawSigner(address _withdrawSigner) external onlyMultiSig {
+        withdrawSigner = _withdrawSigner;
+    }
+
+    function setMultiSig(address _multiSigAddr) external onlyMultiSig {
         multiSigAddr = _multiSigAddr;
     }
 
@@ -166,8 +168,8 @@ contract Coiin is ERC20Base {
     function withdraw(
         uint256 amount,
         uint256 expires,
-        uint256 nonce
-//        bytes memory sig
+        uint256 nonce,
+        bytes memory sig
     ) public {
         if (withdrawalsPaused == true) revert Coiin__ContractPaused();
         if (amount <= 0) revert Coiin__ZeroAmount();
@@ -178,11 +180,9 @@ contract Coiin is ERC20Base {
 
         usedNonces[nonce] = true;
 
-        // TODO: disabled for testing
         // this recreates the message that was signed on the client
-        // bytes32 message = keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)))
-        // .toEthSignedMessageHash();
-        // require(message.recover(sig) == withdrawSigner, "request not signed by Coiin");
+         bytes32 message = keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)));
+         require(message.toEthSignedMessageHash().recover(sig) == withdrawSigner, "request not signed by Coiin");
 
         // add mint to map
         withdrawMintHistory[nonce].timestamp = block.timestamp;
