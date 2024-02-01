@@ -1,88 +1,136 @@
 const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
-const {expect} = require("chai");
+const {expect, use} = require("chai");
 
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
+const ethers = hre.ethers;
 
+const getSignature = async function (sender, amount, expires, nonce, coiin) {
+
+    const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+    let message = ethers.solidityPackedKeccak256(
+        ["address", "uint256", "uint256", "uint256", "address"],
+        [sender, amount, expires, nonce, coiin]
+    )
+    let sig = await signer.signMessage(ethers.getBytes(message));
+    return sig
+
+}
 describe("Coiin", function () {
     async function deployCoiinFixture() {
         // Contracts are deployed using the first signer/account by default
-        const [owner, otherAccount] = await ethers.getSigners();
+        const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
 
         const Coiin = await ethers.getContractFactory("Coiin");
-        const coiin = await Coiin.deploy(owner, "Coiin", "COIINAM");
+        const coiin = await Coiin.deploy(owner, owner, multiSig, signer, "Coiin", "COIINAM");
 
         return {coiin, owner, otherAccount};
     }
 
-    describe("Withdraw", function () {
-        it("Contract Pause", async function () {
-            const {coiin} = await loadFixture(deployCoiinFixture);
+    describe("Test Withdraw", function () {
+        it("Checks Contract Withdraw with signature verification", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day + 60*60*24
 
-            expect(await coiin.withdrawalsPaused()).to.equal(false);
+            // Hash the info
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+            )            
+            // sign the hash as bytes
+            let sig = await signer.signMessage(ethers.getBytes(message));
+            await coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig);
+        })
+        it("Checks Withdraw with invalid signature", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day + 60*60*24
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 1, (await coiin.getAddress())]
+            )            
+            //sign with the wrong key
+            let sig = await mockUser2.signMessage(ethers.getBytes(message));
+            await expect(
+                coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
+            ).to.be.revertedWithCustomError(coiin, "Coiin__InvalidSignature");
+        })
+        it("checks withdraw fails with used nonce", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day + 60*60*24
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+            )            
+            let sig = await signer.signMessage(ethers.getBytes(message));
+            await coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig);
+            await expect(
+                coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
+            ).to.be.revertedWithCustomError(coiin, "Coiin__InvalidNonce");
+        })
+        it("checks that withdraw fails with expired signature", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day - 60*60*24
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+            )            
+            let sig = await signer.signMessage(ethers.getBytes(message));
+            await expect(
+                coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
+            ).to.be.revertedWithCustomError(coiin, "Coiin__Expired");
+        })
+        it("checks that withdraw fails with zero amount", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day + 60*60*24
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, 0, expires, 0, (await coiin.getAddress())]
+            )            
+            let sig = await signer.signMessage(ethers.getBytes(message));
+            await expect(
+                coiin.connect(mockUser1).withdraw(0, expires, 0, sig)
+            ).to.be.revertedWithCustomError(coiin, "Coiin__ZeroAmount");
+        })
+        it("checks that withdraw fails with paused contract", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            let one_day = (await time.latest())
+            let expires = one_day + 60*60*24
+            let message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "uint256", "uint256", "address"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+            )            
+            let sig = await signer.signMessage(ethers.getBytes(message));
             await coiin.pauseWithdrawals(true);
-            expect(await coiin.withdrawalsPaused()).to.equal(true);
+            await expect(
+                coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
+            ).to.be.revertedWithCustomError(coiin, "Coiin__ContractPaused");
+        })
+    })
 
-            await expect(coiin.withdraw(
-                1,
-                Math.floor(new Date().getTime() / 1000),
-                1,
-                //'0x00',
-            )).to.be.revertedWithCustomError(coiin, "Coiin__ContractPaused");
-        });
-
-        it("Contract withdraw zero amount", async function () {
-            const {coiin} = await loadFixture(deployCoiinFixture);
-
-            await expect(coiin.withdraw(
-                0,
-                Math.floor(new Date().getTime() / 1000) + 10000,
-                1,
-                //'0x00',
-            )).to.be.revertedWithCustomError(coiin, "Coiin__ZeroAmount");
-        });
-
-        it("Contract withdraw dup transaction", async function () {
-            const {coiin} = await loadFixture(deployCoiinFixture);
-
-            await expect(coiin.withdraw(
-                1,
-                Math.floor(new Date().getTime() / 1000) + 10000,
-                0, // Zero nonce is already marked as used
-                //'0x00',
-            )).to.be.revertedWithCustomError(coiin, "Coiin__InvalidNonce");
-
-        });
-
-        it("Contract withdraw expired", async function () {
-            const {coiin} = await loadFixture(deployCoiinFixture);
-
-            await expect(coiin.withdraw(
-                1,
-                Math.floor(new Date().getTime() / 1000) - 1000,
-                1,
-                //'0x00',
-            )).to.be.revertedWithCustomError(coiin, "Coiin__Expired");
-        });
-
-        // it("Contract withdraw not signed by coiin", async function () {
-        //     const {coiin} = await loadFixture(deployCoiinFixture);
-        //
-        //     await expect(coiin.withdraw(
-        //         1,
-        //         Math.floor(new Date().getTime() / 1000) + 10000,
-        //         1,
-        //         '0x00',
-        //     )).to.be.revertedWith("request not signed by Coiin");
-        // });
-
+    describe("Withdraw", function () {
         it("Contract withdraw", async function () {
-            const {coiin, owner} = await loadFixture(deployCoiinFixture);
+            const {coiin} = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
 
-            await expect(coiin.withdraw(
-                '20000000000000000000000',
-                Math.floor(new Date().getTime() / 1000) + 10000,
-                1,
-                //'0x00',
+            let expires = Math.floor(new Date().getTime() / 1000) + 10000
+            let sig = await getSignature(
+                mockUser1.address, ethers.parseEther('100'), expires, 10, (await coiin.getAddress())
+            )
+            await expect(coiin.connect(mockUser1).withdraw(
+                ethers.parseEther('100'),
+                expires,
+                10,
+                sig
             )).to.emit(coiin, "Transfer");
 
             let balance = await coiin.balanceOf(owner.getAddress())
@@ -91,11 +139,14 @@ describe("Coiin", function () {
             let mint = await coiin.withdrawMintHistory(1)
             console.log("Mint:", mint);
 
-            await expect(coiin.withdraw(
-                '100000000000000000000',
-                Math.floor(new Date().getTime() / 1000) + 10000,
-                2,
-                //'0x00',
+            sig = await getSignature(
+                mockUser1.address, ethers.parseEther('200000'), expires, 11, (await coiin.getAddress())
+            )
+            await expect(coiin.connect(mockUser1).withdraw(
+                ethers.parseEther('200000'),
+                expires,
+                11,
+                sig
             )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit");
         });
 
@@ -105,11 +156,16 @@ describe("Coiin", function () {
             let nonce = 1;
             const accounts = await ethers.getSigners();
             for (const account of accounts) {
+                let one_day = (await time.latest())
+                let expires = one_day + 60*60*24
+                let sig = await getSignature(
+                    account.address, ethers.parseEther('100'), expires, nonce, (await coiin.getAddress())
+                )
                 await expect(coiin.connect(account).withdraw(
-                    '100000000000000000000',
-                    Math.floor(new Date().getTime() / 1000) + 10000,
+                    ethers.parseEther('100'),
+                    expires,
                     nonce,
-                    //'0x00',
+                    sig,
                 )).to.emit(coiin, "Transfer");
 
                 let balance = await coiin.balanceOf(account.getAddress())
@@ -123,11 +179,16 @@ describe("Coiin", function () {
 
 
             for (const account of accounts) {
+                let one_day = (await time.latest())
+                let expires = one_day + 60*60*24
+                let sig = await getSignature(
+                    account.address, ethers.parseEther('100'), expires, nonce, (await coiin.getAddress())
+                )
                 await expect(coiin.connect(account).withdraw(
                     ethers.parseEther('100'),
-                    (Math.floor(new Date().getTime() / 1000) + 60*60*25) + 10000,
+                    expires,
                     nonce,
-                    //'0x00',
+                    sig,
                 )).to.emit(coiin, "Transfer");
 
                 let balance = await coiin.balanceOf(account.getAddress())

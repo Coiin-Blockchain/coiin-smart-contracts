@@ -3,8 +3,9 @@ pragma solidity 0.8.20;
 
 
 import "@thirdweb-dev/contracts/base/ERC20Base.sol";
-import "./utils/CoiinECDSA.sol";
-
+// import "./utils/CoiinECDSA.sol";
+import { ECDSA as CoiinECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
 error Coiin__ContractPaused();
@@ -15,8 +16,10 @@ error Coiin__Expired();
 error Coiin__MaxWithdrawAccountLimit();
 error Coiin__MaxWithdraLimit();
 error Coiin__MaxWithdrawClusterLimit();
+error Coiin__InvalidSignature();
 contract Coiin is ERC20Base {
     using CoiinECDSA for bytes32;
+    using MessageHashUtils for bytes32;
 
     bool public withdrawalsPaused;
 
@@ -49,6 +52,7 @@ contract Coiin is ERC20Base {
         address _defaultAdmin,
         address _multiSigAddr,
         address _initialMintTo,
+        address _withdrawSigner,
         string memory _name,
         string memory _symbol)
     ERC20Base(
@@ -59,6 +63,7 @@ contract Coiin is ERC20Base {
     {
         ownerAddr = msg.sender;
         multiSigAddr = _multiSigAddr;
+        withdrawSigner = _withdrawSigner;
 
         withdrawMaxLimit = 100_000 ether;
         withdrawMaxPeriod = 1 days; // 24 hrs
@@ -181,8 +186,10 @@ contract Coiin is ERC20Base {
         usedNonces[nonce] = true;
 
         // this recreates the message that was signed on the client
-         bytes32 message = keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)));
-         require(message.toEthSignedMessageHash().recover(sig) == withdrawSigner, "request not signed by Coiin");
+        bytes32 message = 
+            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)))
+            .toEthSignedMessageHash();
+        if(message.recover(sig) != withdrawSigner) revert Coiin__InvalidSignature();
 
         // add mint to map
         withdrawMintHistory[nonce].timestamp = block.timestamp;
