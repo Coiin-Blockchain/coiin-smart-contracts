@@ -1,22 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
-
-
-import "@thirdweb-dev/contracts/base/ERC20Base.sol";
+import { ERC20Base } from "@thirdweb-dev/contracts/base/ERC20Base.sol";
 // import "./utils/CoiinECDSA.sol";
 import { ECDSA as CoiinECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
+
 error Coiin__ContractPaused();
 error Coiin__BalanceTooLow();
 error Coiin__ZeroAmount();
 error Coiin__InvalidNonce();
 error Coiin__Expired();
 error Coiin__MaxWithdrawAccountLimit();
-error Coiin__MaxWithdraLimit();
+error Coiin__MaxWithdrawLimit();
 error Coiin__MaxWithdrawClusterLimit();
 error Coiin__InvalidSignature();
+error Coiin__OnlyMultisig();
+
+/// @title Coiin Token Contract
+/// @author Coiin 
+/// @notice Implements the Coiin BEP20 token 
 contract Coiin is ERC20Base {
     using CoiinECDSA for bytes32;
     using MessageHashUtils for bytes32;
@@ -39,14 +43,15 @@ contract Coiin is ERC20Base {
     address public ownerAddr;
     address public multiSigAddr;
 
-    struct withdrawMint {
+    struct WithdrawMint {
         address account;
         uint256 timestamp;
         uint256 amount;
     }
 
-    mapping(uint256 => withdrawMint) public withdrawMintHistory;
-    uint256[] public withdrawMintNonce;
+    mapping(uint256 => WithdrawMint) public withdrawMintHistory;
+    uint256 private first;
+    uint256 private last;
 
     constructor(
         address _defaultAdmin,
@@ -79,34 +84,8 @@ contract Coiin is ERC20Base {
     }
 
     modifier onlyMultiSig {
-        require(msg.sender == multiSigAddr, "not multiSig addr");
+        if(msg.sender != multiSigAddr) revert Coiin__OnlyMultisig();
         _;
-    }
-
-    function getWithdrawLimits() public view
-    returns (
-        uint256 _withdrawMaxLimit,
-        uint256 _withdrawMaxPeriod,
-        uint256 _withdrawAccountLimit,
-        uint256 _withdrawAccountPeriod,
-        uint256 _withdrawClusterLimit,
-        uint256 _withdrawClusterPeriod,
-        uint256 _withdrawClusterSize
-    ){
-        return (
-            withdrawMaxLimit,
-            withdrawMaxPeriod,
-            withdrawAccountLimit,
-            withdrawAccountPeriod,
-            withdrawClusterLimit,
-            withdrawClusterPeriod,
-            withdrawClusterSize
-        );
-    }
-
-    // Disabled
-    function mintTo(address, uint256) public pure override {
-        revert("");
     }
 
     function deposit(uint256 amount) external {
@@ -170,18 +149,38 @@ contract Coiin is ERC20Base {
         withdrawClusterSize = _withdrawClusterSize;
     }
 
+    function getWithdrawLimits() public view
+    returns (
+        uint256 _withdrawMaxLimit,
+        uint256 _withdrawMaxPeriod,
+        uint256 _withdrawAccountLimit,
+        uint256 _withdrawAccountPeriod,
+        uint256 _withdrawClusterLimit,
+        uint256 _withdrawClusterPeriod,
+        uint256 _withdrawClusterSize
+    ){
+        return (
+            withdrawMaxLimit,
+            withdrawMaxPeriod,
+            withdrawAccountLimit,
+            withdrawAccountPeriod,
+            withdrawClusterLimit,
+            withdrawClusterPeriod,
+            withdrawClusterSize
+        );
+    }
+
     function withdraw(
         uint256 amount,
         uint256 expires,
         uint256 nonce,
         bytes memory sig
-    ) public {
+    ) external {
         if (withdrawalsPaused == true) revert Coiin__ContractPaused();
         if (amount <= 0) revert Coiin__ZeroAmount();
         if (usedNonces[nonce]) revert Coiin__InvalidNonce();
         if (block.timestamp >= expires) revert Coiin__Expired();
         checkWithdrawLimits(msg.sender, amount);
-
 
         usedNonces[nonce] = true;
 
@@ -192,14 +191,16 @@ contract Coiin is ERC20Base {
         if(message.recover(sig) != withdrawSigner) revert Coiin__InvalidSignature();
 
         // add mint to map
-        withdrawMintHistory[nonce].timestamp = block.timestamp;
-        withdrawMintHistory[nonce].account = msg.sender;
-        withdrawMintHistory[nonce].amount = amount;
-        withdrawMintNonce.push(nonce);
-
+        enqueue(WithdrawMint({
+            account: msg.sender,
+            timestamp: block.timestamp,
+            amount: amount
+        }));
         _mint(msg.sender, amount);
     }
-
+    function _canMint() internal view override returns (bool) {
+        return false;
+    }
     function checkWithdrawLimits(address account, uint256 amount) private {
         if (amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
 
@@ -208,39 +209,52 @@ contract Coiin is ERC20Base {
         uint256 clusterWithdraw = 0;
         uint popCnt = 0;
 
-        for (uint i = 0; i < withdrawMintNonce.length; i++) {
-            withdrawMint memory mint = withdrawMintHistory[withdrawMintNonce[i]];
+        for (uint i = 0; i < historyLength(); i++) {
+            WithdrawMint memory mint = withdrawMintHistory[first + i];
 
+            // if mint is older than period then increment popCnt for deletion
             if (mint.timestamp < block.timestamp - withdrawMaxPeriod) {
-                popCnt = withdrawMintNonce.length - i;
-                break;
-            }
-
-            totalWithdraw = totalWithdraw + mint.amount;
-
-            if (i <= withdrawClusterSize && mint.timestamp > block.timestamp - withdrawClusterPeriod) {
-                clusterWithdraw = clusterWithdraw + mint.amount;
-            }
-
-            if (mint.account == account) {
-                accWithdraw = accWithdraw + mint.amount;
+                console.log("Mint is older than 24 hours: ", i);
+                popCnt += 1;
+            } else { // otherwise include mint in calculations
+                totalWithdraw = totalWithdraw + mint.amount;
+                if (isInCluster(first+i) && mint.timestamp > block.timestamp - withdrawClusterPeriod) {
+                    clusterWithdraw = clusterWithdraw + mint.amount;
+                }
+                if (mint.account == account && mint.timestamp > block.timestamp - withdrawAccountPeriod) {
+                    accWithdraw = accWithdraw + mint.amount;
+                }
             }
         }
+        dequeue(popCnt);
 
-        // Pop mints that are older than 24 hours
-        if (popCnt > 0) {
-            for (uint i = 0; i < popCnt; i++) {
-                popWithdrawMint();
-            }
-        }
-
-        if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdraLimit();
+        if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdrawLimit();
         if (accWithdraw + amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
         if (clusterWithdraw + amount > withdrawClusterLimit) revert Coiin__MaxWithdrawClusterLimit();
+        _mint(msg.sender, amount);
+    }
+    function isInCluster(uint256 _index) private view returns (bool) {
+        if (historyLength() < withdrawClusterSize || _index >= (last-withdrawClusterSize)) {
+            return true;
+        }
+        return false;
+    }
+    function enqueue(WithdrawMint memory newMint) private {
+        withdrawMintHistory[last] = newMint;
+        last += 1;
     }
 
-    function popWithdrawMint() private {
-        delete withdrawMintHistory[withdrawMintNonce[withdrawMintNonce.length - 1]];
-        withdrawMintNonce.pop();
+    function dequeue(uint256 _popCnt) private {
+        while (_popCnt > 0) {
+            console.log("Deleting: ", first);
+            delete withdrawMintHistory[first];
+            first += 1;
+            _popCnt -= 1;
+        }
     }
+    function historyLength() private view returns (uint256) {
+        return last - first;
+    }
+
+
 }
