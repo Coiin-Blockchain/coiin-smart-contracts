@@ -8,7 +8,6 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ERC20PermitUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 error Coiin__ContractPaused();
@@ -25,7 +24,7 @@ error Coiin__OnlyMultisig();
 /// @title Coiin Token Contract
 /// @author Coiin 
 /// @notice Implements the Coiin BEP20 token 
-contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeable {
+contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeable {
     using CoiinECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -44,7 +43,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     mapping(uint256 => bool) usedNonces;
 
     address public withdrawSigner;
-
     struct WithdrawMint {
         address account;
         uint256 timestamp;
@@ -55,8 +53,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     uint256 private first;
     uint256 private last;
 
-    event Withdraw(address indexed user, uint256 nonce, uint256 amount);
-
     function initialize(
         address _multiSigAddr,
         address _initialMintTo,
@@ -65,7 +61,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         string memory _symbol
     ) external initializer {
         __Ownable2Step_init();
-        __Ownable_init(_multiSigAddr);
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         withdrawSigner = _withdrawSigner;
@@ -82,7 +77,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
 
         _mint(_initialMintTo, 100_000_000 ether);
     }
-
     function deposit(uint256 amount) external {
         if (amount > balanceOf(msg.sender)) revert Coiin__BalanceTooLow();
         _burn(msg.sender, amount);
@@ -91,10 +85,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     function setWithdrawSigner(address _withdrawSigner) external onlyOwner {
         withdrawSigner = _withdrawSigner;
     }
-
-    // function setMultiSig(address _multiSigAddr) external onlyOwner {
-    //     multiSigAddr = _multiSigAddr;
-    // }
 
     function pauseWithdrawals(bool _paused) external onlyOwner {
         withdrawalsPaused = _paused;
@@ -166,37 +156,9 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     }
 
     function withdraw(
-        uint256 amount,
-        uint256 expires,
-        uint256 nonce,
-        bytes memory sig
-    ) external {
-        if (withdrawalsPaused == true) revert Coiin__ContractPaused();
-        if (amount <= 0) revert Coiin__ZeroAmount();
-        if (usedNonces[nonce]) revert Coiin__InvalidNonce();
-        if (block.timestamp >= expires) revert Coiin__Expired();
-        checkWithdrawLimits(msg.sender, amount);
-
-        usedNonces[nonce] = true;
-
-        // this recreates the message that was signed on the client
-        bytes32 message = 
-            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)))
-            .toEthSignedMessageHash();
-        if(message.recover(sig) != withdrawSigner) revert Coiin__InvalidSignature();
-
-        // add mint to map
-        enqueue(WithdrawMint({
-            account: msg.sender,
-            timestamp: block.timestamp,
-            amount: amount
-        }));
+        uint256 amount
+) external {
         _mint(msg.sender, amount);
-        emit Withdraw(msg.sender, nonce, amount);   
-    }
-
-    function rescue(address _token, uint256 amount) external onlyOwner {
-        IERC20(_token).transfer(owner(), amount);
     }
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 

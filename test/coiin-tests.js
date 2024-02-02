@@ -2,8 +2,8 @@ const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {expect, use} = require("chai");
 
 const hre = require("hardhat");
+const {ethers, upgrades } = require("hardhat");
 const { extendConfig } = require("hardhat/config");
-const ethers = hre.ethers;
 
 const getSignature = async function (sender, amount, expires, nonce, coiin) {
 
@@ -22,7 +22,20 @@ describe("Coiin", function () {
         const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
 
         const Coiin = await ethers.getContractFactory("Coiin");
-        const coiin = await Coiin.deploy(owner, multiSig, owner, signer, "Coiin", "COIINAM");
+        // const coiin = await Coiin.deploy();
+
+        const coiin = await upgrades.deployProxy(
+            Coiin,
+        [
+            multiSig.address,
+            owner.address,
+            signer.address,
+            "CoiinAM", 
+            "COIINAM"
+        ],
+            { initializer: 'initialize' }
+        );
+        await coiin.waitForDeployment();
 
         return {coiin, owner, otherAccount};
     }
@@ -294,6 +307,22 @@ describe("Coiin", function () {
                     (await ethers.getSigners())[userWallet].address, ethers.parseEther('80000'), expires, 13, (await coiin.getAddress())
                 )
                 await coiin.connect((await ethers.getSigners())[userWallet]).withdraw(ethers.parseEther('80000'), expires, 13, sig)
+            })
+            it("tests Rescue Tokens from contract", async function() {
+                const { coiin } = await loadFixture(deployCoiinFixture);
+                const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3, mockUser4, mockUser5, mockUser6] = await ethers.getSigners();
+                let address = await coiin.getAddress()
+
+                await coiin.connect(owner).transfer(address, ethers.parseEther('1000'))
+
+                await coiin.connect(multiSig).rescue(address, ethers.parseEther('500'))
+                expect((await coiin.balanceOf(address))).to.be.equal(ethers.parseEther('500'))
+                await coiin.connect(multiSig).rescue(address, ethers.parseEther('500'))
+                expect((await coiin.balanceOf(address))).to.be.equal(ethers.parseEther('0'))
+
+
+
+                
             })
         })
     })

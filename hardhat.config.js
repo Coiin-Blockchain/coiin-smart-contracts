@@ -1,7 +1,7 @@
 /** @type import('hardhat/config').HardhatUserConfig */
 
 require("@nomicfoundation/hardhat-toolbox");
-
+require('@openzeppelin/hardhat-upgrades');
 const { mnemonic } = require('./secrets.json');
 
 // This is a sample Hardhat task. To learn how to create your own go to

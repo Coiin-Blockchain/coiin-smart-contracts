@@ -10,11 +10,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@openzeppelin/hardhat-upgrades": "^3.0.2",
     "hardhat": "^2.19.4"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/contracts": "^5.0.1",
+    "@openzeppelin/contracts-upgradeable": "^5.0.1",
     "@thirdweb-dev/contracts": "^3.11.0"
   }
 }
