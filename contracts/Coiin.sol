@@ -230,7 +230,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdrawLimit();
         if (accWithdraw + amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
         if (clusterWithdraw + amount > withdrawClusterLimit) revert Coiin__MaxWithdrawClusterLimit();
-        _mint(msg.sender, amount);
     }
     function isInCluster(uint256 _index) private view returns (bool) {
         if (historyLength() < withdrawClusterSize || _index >= (last-withdrawClusterSize)) {
