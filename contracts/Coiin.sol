@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
-import { ERC20Base } from "@thirdweb-dev/contracts/base/ERC20Base.sol";
-// import "./utils/CoiinECDSA.sol";
 import { ECDSA as CoiinECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-// Uncomment this line to use console.log
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ERC20PermitUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+// NOTE: TODO: Delete in production
 import "hardhat/console.sol";
 
 error Coiin__ContractPaused();
@@ -91,10 +90,6 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     function setWithdrawSigner(address _withdrawSigner) external onlyOwner {
         withdrawSigner = _withdrawSigner;
     }
-
-    // function setMultiSig(address _multiSigAddr) external onlyOwner {
-    //     multiSigAddr = _multiSigAddr;
-    // }
 
     function pauseWithdrawals(bool _paused) external onlyOwner {
         withdrawalsPaused = _paused;

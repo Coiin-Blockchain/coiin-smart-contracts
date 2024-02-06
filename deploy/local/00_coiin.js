@@ -1,23 +1,22 @@
 const { ethers, upgrades } = require("hardhat");
 
 async function main() {
-    const [deployer] = await ethers.getSigners();
 
+    const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     const Coiin = await ethers.getContractFactory("Coiin");
     const coiin = await upgrades.deployProxy(
         Coiin,
         [
-            deployer.address,
-            "0x4B7DC4697d860efFF0F1CF073D466b9e68c7cb47",
-            deployer.address,
-            "Coiin",
-            "COIIN"
+            multiSig.address,
+            owner.address,
+            signer.address,
+            "CoiinAM",
+            "COIINAM"
         ],
         { initializer: 'initialize' }
     );
     await coiin.waitForDeployment();
-
-    console.log("Contract Address:", coiin.target);
+    console.log("Deployed Coiin at: ", (await coiin.getAddress()))
 }
 
 main();
