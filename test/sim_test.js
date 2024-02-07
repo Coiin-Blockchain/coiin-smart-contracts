@@ -35,6 +35,7 @@ const verifySignature = async function (sender, amount, expires, nonce, coiin, s
     return verification
 
 }
+
 describe("sig check", function () {
     it("check sig", async function() {
         let coiin = await ethers.getContractFactory("Coiin");
@@ -98,31 +99,37 @@ describe("Simulation Testing", function () {
     }
 
     it("Tests", async function() {
+        this.timeout(0)
         const { coiin } = await loadFixture(deployCoiinFixture);
         const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3, mockUser4 ] = await ethers.getSigners();
-
+        //var cluster = []
+        var mintHistory = []
         // Track the Withdraw limit 24 Hours 
         // Track the cluster limits 
 
         // ignore cluster limit 
-        await coiin.connect(multiSig).setWithdrawClusterLimits(ethers.parseEther('10000000000000'), (60), 10)
-        await coiin.connect(multiSig).setWithdrawMaxLimits(ethers.parseEther('200000000000000'), (60))
+        //await coiin.connect(multiSig).setWithdrawClusterLimits(ethers.parseEther('10000000000000'), (60), 10)
+        //await coiin.connect(multiSig).setWithdrawMaxLimits(ethers.parseEther('200000000000000'), (60))
         let user_start = 4
-        let user_range = 19
+        let user_range = 10
         let nonce = 0
-        let cluster = []
+
+        let totalSupply = await coiin.totalSupply()
+        var balances = Array(user_range+1).fill(ethers.toBigInt(0))
 
         // random mint amount
-        for (let i = 0; i < 250; i++) {
-            let mint_amount = ethers.parseEther((getRandomInt(1, 100000)).toString())
-            let expiresIn = getRandomInt(60, (60*60*24))
-            let expires = (await time.latest()) + expiresIn
+        for (let i = 0; i < 10000; i++) {
+            let mint_amount = ethers.parseEther((getRandomInt(3, 6666)).toString())
+            let expiresIn = getRandomInt(60*60, (60*60*24))
+            let now = (await time.latest())
+            let expires = now + expiresIn
 
             let user_index = getRandomInt(user_start, user_range)
             let user = (await ethers.getSigners())[user_index]
 
-            let time_increase = getRandomInt(1, 60*60*24)
+            let time_increase = getRandomInt(1, 60*3)
             await time.increase(time_increase)
+            now = await time.latest()
 
             let signature = await getSignature(
                 user.address,
@@ -131,39 +138,84 @@ describe("Simulation Testing", function () {
                 nonce,
                 (await coiin.getAddress())
             )
-            // mint amount to ether 
-            // mint_amount formatted as ether 
 
-            // console.log("time increase", time_increase)
-            // console.log("expiresIn", expiresIn)
-            // console.log(mint_amount / ethers.parseEther("1"))
-
-            // console.log("expires", expires)
-            // console.log("latest: ", (await time.latest()))
-            if(time_increase > expiresIn) {
-                // console.log("hit exired")
-                console.log("Coiin__Expired")
+            if(now > expires) {
+                //console.log("Coiin__Expired")
                 await expect((
                     coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
                 )).to.be.revertedWithCustomError(coiin, "Coiin__Expired")
             } else if (mint_amount > ethers.parseEther("20000")) {
-                // withdraw account limit 
-                // console.log("hit withdraw")
-                console.log("Coiin__MaxWithdrawAccountLimit")
+                //console.log("Coiin__MaxWithdrawAccountLimit")
                 await expect((
                     coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
                     )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit")
             } else {
-                console.log("success")
-                await coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
+                let withdrawHistory = {
+                    user: user.address,
+                    amount: mint_amount,
+                    timestamp: now
+                }
+                // withdraw history
+                // check withdraw history 
+                let withdrawTotal = ethers.toBigInt(0)
+                let clusterTotal = ethers.toBigInt(0)
+                let accountTotal = ethers.toBigInt(0)
+                let temp = mintHistory
+                for (let i = 0; i < mintHistory.length; i++) {
+                    if (mintHistory[i].timestamp <= (now - (60*60*24))) {
+                        mintHistory.shift()
+                        i = i -1
+                    } else {
+                        withdrawTotal += mintHistory[i].amount
+                        if (i >= mintHistory.length - 10 ) {
+                            //                        in cluster 
+                            if (mintHistory[i] != undefined) {
+                                if (mintHistory[i].timestamp >= (now - (60*60*12))) {
+                                    clusterTotal += mintHistory[i].amount
+                                }   
+                            }
+                        }
+                        if (mintHistory[i].user == user.address) {
+                            accountTotal += mintHistory[i].amount
+                        }
+                    }
+
+                }
+
+                console.log("mint amount: ", mint_amount / ethers.parseEther("1"), "total mint: ", withdrawTotal/ ethers.parseEther("1"), "cluster total: ", clusterTotal/ ethers.parseEther("1"), " account total: ", accountTotal/ ethers.parseEther("1"))
+                if (ethers.toBigInt(withdrawTotal) + mint_amount > ethers.parseEther("100000")) {
+                    console.log("=======Coiin__MaxWithdrawLimit=======")
+                    await expect((
+                        coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
+                        )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawLimit")
+
+                    await time.increase(60*60*3)
+                } else if (ethers.toBigInt(accountTotal) + mint_amount > ethers.parseEther("20000")) {
+                    console.log("Coiin__MaxWithdrawAccountLimit")
+                    await expect((
+                        coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
+                    )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit")
+
+                    await time.increase(60*60*3)
+                } else if (ethers.toBigInt(clusterTotal) + mint_amount > ethers.parseEther("33333")) {
+                    console.log("Coiin__MaxWithdrawClusterLimit")
+                    await expect((
+                        coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
+                        )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawClusterLimit")
+
+                    await time.increase(60*60*3)
+                } else {
+                    mintHistory.push(withdrawHistory)
+                    //console.log("success")
+                    await coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
+                    totalSupply += mint_amount
+                    balances[user_index] += mint_amount
+                    expect((await coiin.totalSupply())).to.equal(totalSupply)
+                    expect((await coiin.balanceOf(user.address))).to.equal(balances[user_index])
+                }
+
             }
-
-            // console.log(ethers.parseUnits(mint_amount.toString(), "wei").toString())
-
             nonce++;
-            // console.log(nonce)
-            
-            // if (mint_amount > )
         }
     })
 })
