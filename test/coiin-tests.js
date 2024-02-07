@@ -51,9 +51,12 @@ describe("Coiin", function () {
         it("Checks deposit(burn) revert with balance low", async function() {   
             const { coiin } = await loadFixture(deployCoiinFixture);
             const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+            // await expect(
+            //     coiin.connect(mockUser1).deposit(ethers.parseEther('100'))
+            // ).to.be.revertedWithCustomError(coiin, "Coiin__BalanceTooLow");
             await expect(
                 coiin.connect(mockUser1).deposit(ethers.parseEther('100'))
-            ).to.be.revertedWithCustomError(coiin, "Coiin__BalanceTooLow");
+            ).to.be.rejectedWith("Coiin: Balance too low");
         })
 
     })
@@ -87,7 +90,7 @@ describe("Coiin", function () {
             let sig = await mockUser2.signMessage(ethers.getBytes(message));
             await expect(
                 coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
-            ).to.be.revertedWithCustomError(coiin, "Coiin__InvalidSignature");
+            ).to.be.rejectedWith("Coiin: Invalid Signature");
         })
         it("checks withdraw fails with used nonce", async function() {
             const { coiin } = await loadFixture(deployCoiinFixture);
@@ -102,7 +105,7 @@ describe("Coiin", function () {
             await coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig);
             await expect(
                 coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
-            ).to.be.revertedWithCustomError(coiin, "Coiin__InvalidNonce");
+            ).to.be.rejectedWith("Coiin: Invalid nonce");
         })
         it("checks that withdraw fails with expired signature", async function() {
             const { coiin } = await loadFixture(deployCoiinFixture);
@@ -116,7 +119,7 @@ describe("Coiin", function () {
             let sig = await signer.signMessage(ethers.getBytes(message));
             await expect(
                 coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
-            ).to.be.revertedWithCustomError(coiin, "Coiin__Expired");
+            ).to.be.rejectedWith("Coiin: Expired");
         })
         it("checks that withdraw fails with zero amount", async function() {
             const { coiin } = await loadFixture(deployCoiinFixture);
@@ -130,7 +133,7 @@ describe("Coiin", function () {
             let sig = await signer.signMessage(ethers.getBytes(message));
             await expect(
                 coiin.connect(mockUser1).withdraw(0, expires, 0, sig)
-            ).to.be.revertedWithCustomError(coiin, "Coiin__ZeroAmount");
+            ).to.be.rejectedWith("Coiin: Zero amount");
         })
         it("checks that withdraw fails with paused contract", async function() {
             const { coiin } = await loadFixture(deployCoiinFixture);
@@ -145,7 +148,7 @@ describe("Coiin", function () {
             await coiin.connect(multiSig).pauseWithdrawals(true);
             await expect(
                 coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig)
-            ).to.be.revertedWithCustomError(coiin, "Coiin__ContractPaused");
+            ).to.be.rejectedWith("Coiin: Contract Paused");
         })
         describe("Test Withdraw Limits", function () {
             // Account Limit per Period = 20,000
@@ -161,7 +164,7 @@ describe("Coiin", function () {
                 )
                 await expect(
                     coiin.connect(mockUser1).withdraw(amount, expires, 0, sig)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit");
+                ).to.be.rejectedWith("Coiin: Max Withdraw Account Limit");
             })
             it("Checks Account Withdraw Limit per Period", async function() {
                 const { coiin } = await loadFixture(deployCoiinFixture);
@@ -178,7 +181,7 @@ describe("Coiin", function () {
                 await coiin.connect(mockUser1).withdraw(amount, expires, 0, sig)
                 await expect(
                     coiin.connect(mockUser1).withdraw(amount, expires, 1, sig2)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit");
+                ).to.be.rejectedWith("Coiin: Max Withdraw Account Limit");
             })
             // period limit = 100,000
             // period = 24 hours
@@ -217,7 +220,7 @@ describe("Coiin", function () {
                 
                 await expect(
                     coiin.connect(mockUser6).withdraw(amount, expires, 5, sig6)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawLimit");
+                ).to.be.rejectedWith(coiin, "Coiin: Max Withdraw Limit");
             })
             // cluster limit = 33,000
             // period = 12 hours
@@ -245,7 +248,7 @@ describe("Coiin", function () {
                 )
                 await expect(
                     coiin.connect(userWallet).withdraw(ethers.parseEther('3334'), expires, 9, sig)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawClusterLimit");
+                ).to.be.rejectedWith(coiin, "Coiin: Max Withdraw Cluster Limit");
             })
             it("Tests 24 hour window", async function() {
                 const { coiin } = await loadFixture(deployCoiinFixture);
@@ -284,7 +287,7 @@ describe("Coiin", function () {
                 )
                 await expect(
                     coiin.connect((await ethers.getSigners())[userWallet]).withdraw(amount, expires, 11, sig)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawLimit");
+                ).to.be.rejectedWith("Coiin: Max Withdraw Limit");
 
                 // after another 13 hours the window should cleared of 9 with 10,000 remaining
                 await time.increase(60*60*13)
@@ -301,7 +304,7 @@ describe("Coiin", function () {
                 )
                 await expect(
                     coiin.connect((await ethers.getSigners())[userWallet]).withdraw(ethers.parseEther('80001'), expires, 13, sig)
-                ).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawLimit");
+                ).to.be.rejectedWith("Coiin: Max Withdraw Limit");
                 userWallet = 10 + 7
                 sig = getSignature(
                     (await ethers.getSigners())[userWallet].address, ethers.parseEther('80000'), expires, 13, (await coiin.getAddress())
@@ -357,7 +360,7 @@ describe("Coiin", function () {
                 expires,
                 11,
                 sig
-            )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit");
+            )).to.be.rejectedWith("Coiin: Max Withdraw Account Limit");
         });
 
         it("Contract withdraw history", async function () {

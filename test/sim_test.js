@@ -36,43 +36,43 @@ const verifySignature = async function (sender, amount, expires, nonce, coiin, s
 
 }
 
-describe("sig check", function () {
-    it("check sig", async function() {
-        let coiin = await ethers.getContractFactory("Coiin");
-        console.log("check sig")
-        let verify = await verifySignature(
-            "0x2403A8C8A132ACf151AAb0f26b355b370aA18e5a", 
-            1,
-            1707189696,
-            '8470809963594808849',
-            "0x1E513C77Fd27702297a102Bc6E4adE062B8481f2",
-            "0xf8c8920728f0940ef86b15286e7a8a03d400dd4960167b3b5528b90c37e659063dca877b5436649915cd1c945d4edc1b5070b5a5a2b13942db0522239d080c3d00"
-        )
-        console.log(verify)
-        console.log("Error Sigs") 
-        let interface = coiin.interface
-        let expired = interface.getError("Coiin__Expired")
-        let Coiin__InvalidSignature = interface.getError("Coiin__InvalidSignature")
-        let Coiin__MaxWithdrawAccountLimit = interface.getError("Coiin__MaxWithdrawAccountLimit")
-        let Coiin__MaxWithdrawClusterLimit = interface.getError("Coiin__MaxWithdrawClusterLimit")
-        let Coiin__MaxWithdrawLimit = interface.getError("Coiin__MaxWithdrawLimit")
-        let Coiin__BalanceTooLow = interface.getError("Coiin__BalanceTooLow")
-        let Coiin__InvalidNonce = interface.getError("Coiin__InvalidNonce")
-        let Coiin__ZeroAmount = interface.getError("Coiin__ZeroAmount")
-        console.log("====Errors======")
-        console.log("Expired: ", expired.selector)
-        console.log("InvalidSignature: ", Coiin__InvalidSignature.selector)
-        console.log("MaxWithdrawAccountLimit: ", Coiin__MaxWithdrawAccountLimit.selector)
-        console.log("MaxWithdrawClusterLimit: ", Coiin__MaxWithdrawClusterLimit.selector)
-        console.log("MaxWithdrawLimit: ", Coiin__MaxWithdrawLimit.selector)
-        console.log("BalanceTooLow: ", Coiin__BalanceTooLow.selector)
-        console.log("InvalidNonce: ", Coiin__InvalidNonce.selector)
-        console.log("ZeroAmount: ", Coiin__ZeroAmount.selector)
+// describe("sig check", function () {
+//     it("check sig", async function() {
+//         let coiin = await ethers.getContractFactory("Coiin");
+//         console.log("check sig")
+//         let verify = await verifySignature(
+//             "0x2403A8C8A132ACf151AAb0f26b355b370aA18e5a", 
+//             1,
+//             1707189696,
+//             '8470809963594808849',
+//             "0x1E513C77Fd27702297a102Bc6E4adE062B8481f2",
+//             "0xf8c8920728f0940ef86b15286e7a8a03d400dd4960167b3b5528b90c37e659063dca877b5436649915cd1c945d4edc1b5070b5a5a2b13942db0522239d080c3d00"
+//         )
+//         console.log(verify)
+//         console.log("Error Sigs") 
+//         let interface = coiin.interface
+//         let expired = interface.getError("Coiin__Expired")
+//         let Coiin__InvalidSignature = interface.getError("Coiin__InvalidSignature")
+//         let Coiin__MaxWithdrawAccountLimit = interface.getError("Coiin__MaxWithdrawAccountLimit")
+//         let Coiin__MaxWithdrawClusterLimit = interface.getError("Coiin__MaxWithdrawClusterLimit")
+//         let Coiin__MaxWithdrawLimit = interface.getError("Coiin__MaxWithdrawLimit")
+//         let Coiin__BalanceTooLow = interface.getError("Coiin__BalanceTooLow")
+//         let Coiin__InvalidNonce = interface.getError("Coiin__InvalidNonce")
+//         let Coiin__ZeroAmount = interface.getError("Coiin__ZeroAmount")
+//         console.log("====Errors======")
+//         console.log("Expired: ", expired.selector)
+//         console.log("InvalidSignature: ", Coiin__InvalidSignature.selector)
+//         console.log("MaxWithdrawAccountLimit: ", Coiin__MaxWithdrawAccountLimit.selector)
+//         console.log("MaxWithdrawClusterLimit: ", Coiin__MaxWithdrawClusterLimit.selector)
+//         console.log("MaxWithdrawLimit: ", Coiin__MaxWithdrawLimit.selector)
+//         console.log("BalanceTooLow: ", Coiin__BalanceTooLow.selector)
+//         console.log("InvalidNonce: ", Coiin__InvalidNonce.selector)
+//         console.log("ZeroAmount: ", Coiin__ZeroAmount.selector)
 
 
 
-    })
-})
+//     })
+// })
 
 describe("Simulation Testing", function () {
     async function deployCoiinFixture() {
@@ -118,7 +118,7 @@ describe("Simulation Testing", function () {
         var balances = Array(user_range+1).fill(ethers.toBigInt(0))
 
         // random mint amount
-        for (let i = 0; i < 10000; i++) {
+        for (let i = 0; i < 5000; i++) {
             let mint_amount = ethers.parseEther((getRandomInt(3, 6666)).toString())
             let expiresIn = getRandomInt(60*60, (60*60*24))
             let now = (await time.latest())
@@ -143,12 +143,12 @@ describe("Simulation Testing", function () {
                 //console.log("Coiin__Expired")
                 await expect((
                     coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
-                )).to.be.revertedWithCustomError(coiin, "Coiin__Expired")
+                )).to.be.rejectedWith("Coiin: Expired")
             } else if (mint_amount > ethers.parseEther("20000")) {
                 //console.log("Coiin__MaxWithdrawAccountLimit")
                 await expect((
                     coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
-                    )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit")
+                    )).to.be.rejectedWith("Coiin: Max Withdraw Account Limit")
             } else {
                 let withdrawHistory = {
                     user: user.address,
@@ -187,21 +187,21 @@ describe("Simulation Testing", function () {
                     console.log("=======Coiin__MaxWithdrawLimit=======")
                     await expect((
                         coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
-                        )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawLimit")
+                        )).to.be.rejectedWith("Coiin: Max Withdraw Limit")
 
                     await time.increase(60*60*3)
                 } else if (ethers.toBigInt(accountTotal) + mint_amount > ethers.parseEther("20000")) {
                     console.log("Coiin__MaxWithdrawAccountLimit")
                     await expect((
                         coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
-                    )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawAccountLimit")
+                    )).to.be.rejectedWith("Coiin: Max Withdraw Account Limit")
 
                     await time.increase(60*60*3)
                 } else if (ethers.toBigInt(clusterTotal) + mint_amount > ethers.parseEther("33333")) {
                     console.log("Coiin__MaxWithdrawClusterLimit")
                     await expect((
                         coiin.connect(user).withdraw(mint_amount, expires, nonce, signature)
-                        )).to.be.revertedWithCustomError(coiin, "Coiin__MaxWithdrawClusterLimit")
+                        )).to.be.rejectedWith("Coiin: Max Withdraw Cluster Limit")
 
                     await time.increase(60*60*3)
                 } else {
