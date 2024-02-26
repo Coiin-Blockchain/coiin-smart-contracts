@@ -7,20 +7,6 @@ import { ERC20PermitUpgradeable } from "@openzeppelin/contracts-upgradeable/toke
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// NOTE: TODO: Delete in production
-import "hardhat/console.sol";
-
-error Coiin__ContractPaused();
-error Coiin__BalanceTooLow();
-error Coiin__ZeroAmount();
-error Coiin__InvalidNonce();
-error Coiin__Expired();
-error Coiin__MaxWithdrawAccountLimit();
-error Coiin__MaxWithdrawLimit();
-error Coiin__MaxWithdrawClusterLimit();
-error Coiin__InvalidSignature();
-error Coiin__OnlyMultisig();
-
 /// @title Coiin Token Contract
 /// @author Coiin 
 /// @notice Implements the Coiin BEP20 token 
@@ -83,7 +69,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     }
 
     function deposit(uint256 amount) external {
-        if (amount > balanceOf(msg.sender)) revert Coiin__BalanceTooLow();
+        require(amount <= balanceOf(msg.sender), "Coiin: Balance too low");
         _burn(msg.sender, amount);
     }
 
@@ -166,21 +152,19 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         uint256 nonce,
         bytes memory sig
     ) external {
-        if (withdrawalsPaused == true) revert Coiin__ContractPaused();
-        if (amount <= 0) revert Coiin__ZeroAmount();
-        if (usedNonces[nonce]) revert Coiin__InvalidNonce();
-        if (block.timestamp >= expires) revert Coiin__Expired();
+        require(!withdrawalsPaused, "Coiin: Contract Paused");
+        require(amount > 0, "Coiin: Zero amount");
+        require(!usedNonces[nonce], "Coiin: Invalid nonce");
+        require(block.timestamp < expires, "Coiin: Expired");
         checkWithdrawLimits(msg.sender, amount);
 
         usedNonces[nonce] = true;
 
-        // this recreates the message that was signed on the client
         bytes32 message = 
             keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)))
             .toEthSignedMessageHash();
-        if(message.recover(sig) != withdrawSigner) revert Coiin__InvalidSignature();
+        require(message.recover(sig) == withdrawSigner, "Coiin: Invalid Signature");
 
-        // add mint to map
         enqueue(WithdrawMint({
             account: msg.sender,
             timestamp: block.timestamp,
@@ -196,7 +180,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function checkWithdrawLimits(address account, uint256 amount) private {
-        if (amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
+        require(amount <= withdrawAccountLimit, "Coiin: Max Withdraw Account Limit");
 
         uint256 totalWithdraw = 0;
         uint256 accWithdraw = 0;
@@ -206,11 +190,9 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         for (uint i = 0; i < historyLength(); i++) {
             WithdrawMint memory mint = withdrawMintHistory[first + i];
 
-            // if mint is older than period then increment popCnt for deletion
             if (mint.timestamp < block.timestamp - withdrawMaxPeriod) {
-                console.log("Mint is older than 24 hours: ", i);
                 popCnt += 1;
-            } else { // otherwise include mint in calculations
+            } else { 
                 totalWithdraw = totalWithdraw + mint.amount;
                 if (isInCluster(first+i) && mint.timestamp > block.timestamp - withdrawClusterPeriod) {
                     clusterWithdraw = clusterWithdraw + mint.amount;
@@ -222,16 +204,18 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         }
         dequeue(popCnt);
 
-        if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdrawLimit();
-        if (accWithdraw + amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
-        if (clusterWithdraw + amount > withdrawClusterLimit) revert Coiin__MaxWithdrawClusterLimit();
+        require(totalWithdraw + amount <= withdrawMaxLimit, "Coiin: Max Withdraw Limit");
+        require(accWithdraw + amount <= withdrawAccountLimit, "Coiin: Max Withdraw Account Limit");
+        require(clusterWithdraw + amount <= withdrawClusterLimit, "Coiin: Max Withdraw Cluster Limit");
     }
+
     function isInCluster(uint256 _index) private view returns (bool) {
         if (historyLength() < withdrawClusterSize || _index >= (last-withdrawClusterSize)) {
             return true;
         }
         return false;
     }
+
     function enqueue(WithdrawMint memory newMint) private {
         withdrawMintHistory[last] = newMint;
         last += 1;
@@ -239,15 +223,13 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
 
     function dequeue(uint256 _popCnt) private {
         while (_popCnt > 0) {
-            console.log("Deleting: ", first);
             delete withdrawMintHistory[first];
             first += 1;
             _popCnt -= 1;
         }
     }
+
     function historyLength() private view returns (uint256) {
         return last - first;
     }
-
-
 }
