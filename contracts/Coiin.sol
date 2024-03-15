@@ -30,6 +30,10 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
 
     address public withdrawSigner;
 
+
+    uint256 public transferFromUnlockDate;
+    mapping(address => bool) public transferFromWhiteList;
+
     struct WithdrawMint {
         address account;
         uint256 timestamp;
@@ -53,6 +57,8 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         __Ownable_init(_multiSigAddr);
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
+
+        transferFromUnlockDate = 1893474000;
         withdrawSigner = _withdrawSigner;
 
         withdrawMaxLimit = 100_000 ether;
@@ -66,6 +72,42 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         withdrawClusterSize = 10;
 
         _mint(_initialMintTo, 100_000_000 ether);
+    }
+
+    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
+        address sender = _msgSender();
+        require(_allowTransferFrom(sender), "Not authorized at this time.");
+        _spendAllowance(from, sender, value);
+        _transfer(from, to, value);
+        return true;
+    }
+
+    function _allowTransferFrom(address sender) private view returns (bool) {
+        return block.timestamp >= transferFromUnlockDate ||
+            sender == owner() ||
+            _isTransferFromWhiteListed(sender);
+    }
+
+    function _isTransferFromWhiteListed(address addr) private view returns (bool) {
+        return transferFromWhiteList[addr];
+    }
+
+    function setTransferFromWhiteList(address addr) external onlyOwner {
+        require(block.timestamp < transferFromUnlockDate, "Can no longer add whitelist address");
+        transferFromWhiteList[addr] = true;
+    }
+
+    function removeTransferFromWhiteList(address addr) external onlyOwner {
+        require(block.timestamp < transferFromUnlockDate, "Can no longer remove whitelist address");
+        if (transferFromWhiteList[addr]) {
+            delete transferFromWhiteList[addr];
+        }
+    }
+
+    function setTransferFromUnlockDate(uint256 value) external onlyOwner {
+        require(block.timestamp < transferFromUnlockDate, "Can no longer set transfer unlock date");
+        require(value > block.timestamp, "New unlock date must be in the future");
+        transferFromUnlockDate = value;
     }
 
     function deposit(uint256 amount) external {

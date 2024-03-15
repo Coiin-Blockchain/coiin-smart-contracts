@@ -39,6 +39,99 @@ describe("Coiin", function () {
 
         return {coiin, owner, otherAccount};
     }
+
+    describe("Test Transfer From Lock", function() {
+        it("Check Set Transfer Unlock Date", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+
+            let newUnlockDate = await time.latest() - 100;
+            await expect(
+                coiin.connect(multiSig).setTransferFromUnlockDate(newUnlockDate)
+            ).to.be.rejectedWith("New unlock date must be in the future");
+
+            newUnlockDate = await time.latest() + 2000;
+            await expect(
+                coiin.connect(multiSig).setTransferFromUnlockDate(newUnlockDate)
+            ).to.be.fulfilled;
+
+            await expect(await coiin.connect(multiSig).transferFromUnlockDate()).to.be.equal(newUnlockDate);
+        })
+
+        it("Check Set Transfer From Whitelist", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+
+            let newUnlockDate = await time.latest() + 1000;
+            await coiin.connect(multiSig).setTransferFromUnlockDate(newUnlockDate)
+
+            await expect(
+                await coiin.connect(multiSig).transferFromWhiteList(otherAccount)
+            ).to.be.equal(false);
+
+            await expect(
+                coiin.connect(multiSig).setTransferFromWhiteList(otherAccount)
+            ).to.be.fulfilled;
+
+            await expect(
+                await coiin.connect(multiSig).transferFromWhiteList(otherAccount)
+            ).to.be.equal(true);
+
+            await expect(
+                coiin.connect(multiSig).removeTransferFromWhiteList(otherAccount)
+            ).to.be.fulfilled;
+
+            await expect(
+                await coiin.connect(multiSig).transferFromWhiteList(otherAccount)
+            ).to.be.equal(false);
+
+            await time.increase(newUnlockDate + 1000);
+
+            await expect(
+                coiin.connect(multiSig).setTransferFromWhiteList(mockUser1)
+            ).to.be.rejectedWith("Can no longer add whitelist address");
+
+            await expect(
+                coiin.connect(multiSig).removeTransferFromWhiteList(mockUser1)
+            ).to.be.rejectedWith("Can no longer remove whitelist address");
+        })
+
+        it("Check Transfer From", async function() {
+            const { coiin } = await loadFixture(deployCoiinFixture);
+            const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
+
+            let newUnlockDate = await time.latest() + 1000;
+            await coiin.connect(multiSig).setTransferFromUnlockDate(newUnlockDate)
+            await coiin.connect(owner).approve(multiSig, 1000);
+            await coiin.connect(owner).approve(mockUser1, 1000);
+            await coiin.connect(owner).approve(mockUser2, 1000);
+
+            await expect(
+                coiin.connect(mockUser1).transferFrom(owner, mockUser3, 10)
+            ).to.be.rejectedWith("Not authorized at this time.");
+
+            await coiin.connect(multiSig).setTransferFromWhiteList(mockUser1);
+
+            await expect(
+                coiin.connect(multiSig).transferFrom(owner, mockUser3, 10)
+            ).to.be.fulfilled;
+
+            await expect(
+                coiin.connect(mockUser1).transferFrom(owner, mockUser3, 10)
+            ).to.be.fulfilled;
+
+            await expect(
+                coiin.connect(mockUser2).transferFrom(owner, mockUser3, 10)
+            ).to.be.rejectedWith("Not authorized at this time.");
+
+            await time.increase(newUnlockDate + 1001);
+
+            await expect(
+                coiin.connect(mockUser2).transferFrom(owner, mockUser3, 10)
+            ).to.be.fulfilled;
+        })
+    })
+
     describe("Test Burn", function() {
         it("Checks can Burn tokens", async function() {
             const { coiin } = await loadFixture(deployCoiinFixture);
@@ -58,7 +151,6 @@ describe("Coiin", function () {
                 coiin.connect(mockUser1).deposit(ethers.parseEther('100'))
             ).to.be.rejectedWith("Coiin: Balance too low");
         })
-
     })
 
     describe("Test Withdraw Signatures", function () {
