@@ -99,9 +99,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
 
     function removeTransferFromWhiteList(address addr) external onlyOwner {
         require(block.timestamp < transferFromUnlockDate, "Can no longer remove whitelist address");
-        if (transferFromWhiteList[addr]) {
-            delete transferFromWhiteList[addr];
-        }
+        transferFromWhiteList[addr] = false;
     }
 
     function setTransferFromUnlockDate(uint256 value) external onlyOwner {
