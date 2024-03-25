@@ -45,7 +45,10 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     uint256 private last;
 
     event Withdraw(address indexed user, uint256 nonce, uint256 amount);
-
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
     function initialize(
         address _multiSigAddr,
         address _initialMintTo,
@@ -53,6 +56,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         string memory _name,
         string memory _symbol
     ) external initializer {
+        require(_withdrawSigner != address(0), "Coiin: Invalid Address");
         __Ownable2Step_init();
         __Ownable_init(_multiSigAddr);
         __ERC20_init(_name, _symbol);
@@ -114,6 +118,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
     }
 
     function setWithdrawSigner(address _withdrawSigner) external onlyOwner {
+        require(_withdrawSigner != address(0), "Coiin: Invalid Address");
         withdrawSigner = _withdrawSigner;
     }
 
