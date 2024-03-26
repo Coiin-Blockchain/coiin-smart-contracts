@@ -39,6 +39,11 @@ module.exports = {
       chainId: 56,
       gasPrice: 20000000000,
       accounts: {mnemonic: mnemonic}
+    },
+    baseMainnet: {
+      url: "https://mainnet.base.org",
+      chainId: 8453,
+      accounts: {mnemonic: mnemonic}
     }
   },
   solidity: {
