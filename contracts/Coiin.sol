@@ -206,7 +206,7 @@ contract Coiin is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeab
         usedNonces[nonce] = true;
 
         bytes32 message = 
-            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this)))
+            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this), block.chainid))
             .toEthSignedMessageHash();
         require(message.recover(sig) == withdrawSigner, "Coiin: Invalid Signature");
 

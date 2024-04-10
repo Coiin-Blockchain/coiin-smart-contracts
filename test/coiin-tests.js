@@ -5,12 +5,13 @@ const hre = require("hardhat");
 const {ethers, upgrades } = require("hardhat");
 const { extendConfig } = require("hardhat/config");
 
-const getSignature = async function (sender, amount, expires, nonce, coiin) {
+const chainId = 31337;
 
+const getSignature = async function (sender, amount, expires, nonce, coiin) {
     const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     let message = ethers.solidityPackedKeccak256(
-        ["address", "uint256", "uint256", "uint256", "address"],
-        [sender, amount, expires, nonce, coiin]
+        ["address", "uint256", "uint256", "uint256", "address", "uint"],
+        [sender, amount, expires, nonce, coiin, chainId]
     )
     let sig = await signer.signMessage(ethers.getBytes(message));
     return sig
@@ -162,8 +163,8 @@ describe("Coiin", function () {
 
             // Hash the info
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress()), chainId]
             )            
             // sign the hash as bytes
             let sig = await signer.signMessage(ethers.getBytes(message));
@@ -175,8 +176,8 @@ describe("Coiin", function () {
             let one_day = (await time.latest())
             let expires = one_day + 60*60*24
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, ethers.parseEther('100'), expires, 1, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 1, (await coiin.getAddress()), chainId]
             )            
             //sign with the wrong key
             let sig = await mockUser2.signMessage(ethers.getBytes(message));
@@ -190,8 +191,8 @@ describe("Coiin", function () {
             let one_day = (await time.latest())
             let expires = one_day + 60*60*24
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress()), chainId]
             )            
             let sig = await signer.signMessage(ethers.getBytes(message));
             await coiin.connect(mockUser1).withdraw(ethers.parseEther('100'), expires, 0, sig);
@@ -205,8 +206,8 @@ describe("Coiin", function () {
             let one_day = (await time.latest())
             let expires = one_day - 60*60*24
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress()), chainId]
             )            
             let sig = await signer.signMessage(ethers.getBytes(message));
             await expect(
@@ -219,8 +220,8 @@ describe("Coiin", function () {
             let one_day = (await time.latest())
             let expires = one_day + 60*60*24
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, 0, expires, 0, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, 0, expires, 0, (await coiin.getAddress()), chainId]
             )            
             let sig = await signer.signMessage(ethers.getBytes(message));
             await expect(
@@ -233,8 +234,8 @@ describe("Coiin", function () {
             let one_day = (await time.latest())
             let expires = one_day + 60*60*24
             let message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "uint256", "uint256", "address"],
-                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress())]
+                ["address", "uint256", "uint256", "uint256", "address", "uint"],
+                [mockUser1.address, ethers.parseEther('100'), expires, 0, (await coiin.getAddress()), chainId]
             )            
             let sig = await signer.signMessage(ethers.getBytes(message));
             await coiin.connect(multiSig).pauseWithdrawals(true);
