@@ -11,8 +11,8 @@ const getSignature = async function (sender, amount, expires, nonce, coiin) {
 
     const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     let message = ethers.solidityPackedKeccak256(
-        ["address", "uint256", "uint256", "uint256", "address", "uint"],
-        [sender, amount, expires, nonce, coiin]
+        ["address", "uint256", "uint256", "uint256", "address", "uint256"],
+        [sender, amount, expires, nonce, coiin,chainId]
     )
     let sig = await signer.signMessage(ethers.getBytes(message), chainId);
     return sig

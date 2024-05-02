@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
-import { ERC20Base } from "@thirdweb-dev/contracts/base/ERC20Base.sol";
+import {ERC20Base} from "@thirdweb-dev/contracts/base/ERC20Base.sol";
 // import "./utils/CoiinECDSA.sol";
-import { ECDSA as CoiinECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA as CoiinECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 // Uncomment this line to use console.log
-import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { ERC20PermitUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
 import "hardhat/console.sol";
 
 error Coiin__ContractPaused();
@@ -22,9 +24,16 @@ error Coiin__InvalidSignature();
 error Coiin__OnlyMultisig();
 
 /// @title Coiin Token Contract
-/// @author Coiin 
-/// @notice Implements the Coiin BEP20 token 
-contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeable {
+/// @author Coiin
+/// @notice Implements the Coiin BEP20 token
+contract CoiinV2 is
+    UUPSUpgradeable,
+    ERC20PermitUpgradeable,
+    Ownable2StepUpgradeable,
+    AccessControlUpgradeable
+{
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     using CoiinECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -37,12 +46,17 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
     uint256 private withdrawAccountPeriod; // Seconds
 
     uint256 private withdrawClusterLimit;
+
     uint256 private withdrawClusterPeriod; // Seconds
     uint256 private withdrawClusterSize;
+
 
     mapping(uint256 => bool) usedNonces;
 
     address public withdrawSigner;
+    uint256 public transferFromUnlockDate;
+    mapping(address => bool) public transferFromWhiteList;
+
     struct WithdrawMint {
         address account;
         uint256 timestamp;
@@ -63,6 +77,8 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
         __Ownable2Step_init();
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
+        __AccessControl_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, _multiSigAddr);
         withdrawSigner = _withdrawSigner;
 
         withdrawMaxLimit = 100_000 ether;
@@ -86,7 +102,7 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
         withdrawSigner = _withdrawSigner;
     }
 
-    function pauseWithdrawals(bool _paused) external onlyOwner {
+    function pauseWithdrawals(bool _paused) external onlyRole(PAUSER_ROLE) {
         withdrawalsPaused = _paused;
     }
 
@@ -134,16 +150,19 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
         withdrawClusterSize = _withdrawClusterSize;
     }
 
-    function getWithdrawLimits() public view
-    returns (
-        uint256 _withdrawMaxLimit,
-        uint256 _withdrawMaxPeriod,
-        uint256 _withdrawAccountLimit,
-        uint256 _withdrawAccountPeriod,
-        uint256 _withdrawClusterLimit,
-        uint256 _withdrawClusterPeriod,
-        uint256 _withdrawClusterSize
-    ){
+    function getWithdrawLimits()
+        public
+        view
+        returns (
+            uint256 _withdrawMaxLimit,
+            uint256 _withdrawMaxPeriod,
+            uint256 _withdrawAccountLimit,
+            uint256 _withdrawAccountPeriod,
+            uint256 _withdrawClusterLimit,
+            uint256 _withdrawClusterPeriod,
+            uint256 _withdrawClusterSize
+        )
+    {
         return (
             withdrawMaxLimit,
             withdrawMaxPeriod,
@@ -155,15 +174,16 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
         );
     }
 
-    function withdraw(
-        uint256 amount
-) external {
+    function withdraw(uint256 amount) external {
         _mint(msg.sender, amount);
     }
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(UPGRADER_ROLE) {}
 
     function checkWithdrawLimits(address account, uint256 amount) private {
-        if (amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
+        if (amount > withdrawAccountLimit)
+            revert Coiin__MaxWithdrawAccountLimit();
 
         uint256 totalWithdraw = 0;
         uint256 accWithdraw = 0;
@@ -177,25 +197,38 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
             if (mint.timestamp < block.timestamp - withdrawMaxPeriod) {
                 console.log("Mint is older than 24 hours: ", i);
                 popCnt += 1;
-            } else { // otherwise include mint in calculations
+            } else {
+                // otherwise include mint in calculations
                 totalWithdraw = totalWithdraw + mint.amount;
-                if (isInCluster(first+i) && mint.timestamp > block.timestamp - withdrawClusterPeriod) {
+                if (
+                    isInCluster(first + i) &&
+                    mint.timestamp > block.timestamp - withdrawClusterPeriod
+                ) {
                     clusterWithdraw = clusterWithdraw + mint.amount;
                 }
-                if (mint.account == account && mint.timestamp > block.timestamp - withdrawAccountPeriod) {
+                if (
+                    mint.account == account &&
+                    mint.timestamp > block.timestamp - withdrawAccountPeriod
+                ) {
                     accWithdraw = accWithdraw + mint.amount;
                 }
             }
         }
         dequeue(popCnt);
 
-        if (totalWithdraw + amount > withdrawMaxLimit) revert Coiin__MaxWithdrawLimit();
-        if (accWithdraw + amount > withdrawAccountLimit) revert Coiin__MaxWithdrawAccountLimit();
-        if (clusterWithdraw + amount > withdrawClusterLimit) revert Coiin__MaxWithdrawClusterLimit();
+        if (totalWithdraw + amount > withdrawMaxLimit)
+            revert Coiin__MaxWithdrawLimit();
+        if (accWithdraw + amount > withdrawAccountLimit)
+            revert Coiin__MaxWithdrawAccountLimit();
+        if (clusterWithdraw + amount > withdrawClusterLimit)
+            revert Coiin__MaxWithdrawClusterLimit();
         _mint(msg.sender, amount);
     }
     function isInCluster(uint256 _index) private view returns (bool) {
-        if (historyLength() < withdrawClusterSize || _index >= (last-withdrawClusterSize)) {
+        if (
+            historyLength() < withdrawClusterSize ||
+            _index >= (last - withdrawClusterSize)
+        ) {
             return true;
         }
         return false;
@@ -216,6 +249,4 @@ contract CoiinV2 is UUPSUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgrade
     function historyLength() private view returns (uint256) {
         return last - first;
     }
-
-
 }

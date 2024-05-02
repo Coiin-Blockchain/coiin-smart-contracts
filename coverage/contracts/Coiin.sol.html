@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\Coiin.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> Coiin.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">96.3% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>52/54</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">76.39% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>55/72</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">83.33% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>20/24</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">86.96% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>80/92</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">93×</span>
+<span class="cline-any cline-yes">92×</span>
+<span class="cline-any cline-yes">91×</span>
+<span class="cline-any cline-yes">90×</span>
+<span class="cline-any cline-yes">89×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">82×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">82×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">82×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">89×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-yes">585×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">585×</span>
+<span class="cline-any cline-yes">30×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">555×</span>
+<span class="cline-any cline-yes">555×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">435×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">555×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">84×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">83×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">555×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">465×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-yes">30×</span>
+<span class="cline-any cline-yes">30×</span>
+<span class="cline-any cline-yes">30×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1227×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.20;
+import {ECDSA as CoiinECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+&nbsp;
+/// @title Coiin Token Contract
+/// @author Coiin
+/// @notice Implements the Coiin BEP20 token
+contract Coiin is
+    UUPSUpgradeable,
+    ERC20PermitUpgradeable,
+    Ownable2StepUpgradeable,
+    AccessControlUpgradeable
+{
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    using CoiinECDSA for bytes32;
+    using MessageHashUtils for bytes32;
+    using SafeERC20 for IERC20;
+&nbsp;
+    bool public withdrawalsPaused;
+&nbsp;
+    uint256 private withdrawMaxLimit;
+    uint256 private withdrawMaxPeriod; // Seconds
+&nbsp;
+    uint256 private withdrawAccountLimit;
+    uint256 private withdrawAccountPeriod; // Seconds
+&nbsp;
+    uint256 private withdrawClusterLimit;
+    uint256 private withdrawClusterPeriod; // Seconds
+    uint256 private withdrawClusterSize;
+&nbsp;
+    mapping(uint256 =&gt; bool) usedNonces;
+&nbsp;
+    address public withdrawSigner;
+&nbsp;
+&nbsp;
+    uint256 public transferFromUnlockDate;
+    mapping(address =&gt; bool) public transferFromWhiteList;
+&nbsp;
+    struct WithdrawMint {
+        address account;
+        uint256 timestamp;
+        uint256 amount;
+    }
+&nbsp;
+    mapping(uint256 =&gt; WithdrawMint) public withdrawMintHistory;
+    uint256 private first;
+    uint256 private last;
+&nbsp;
+    event Withdraw(address indexed user, uint256 nonce, uint256 amount);
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    function initialize(
+        address _multiSigAddr,
+        address _initialMintTo,
+        address _withdrawSigner,
+        string memory _name,
+        string memory _symbol
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>initializer {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_withdrawSigner != address(0), "Coiin: Invalid Address");
+        __Ownable2Step_init();
+        __Ownable_init(_multiSigAddr);
+        __AccessControl_init();
+        __ERC20_init(_name, _symbol);
+        __ERC20Permit_init(_name);
+&nbsp;
+        _grantRole(DEFAULT_ADMIN_ROLE, _multiSigAddr);
+&nbsp;
+        transferFromUnlockDate = 1893474000;
+        withdrawSigner = _withdrawSigner;
+        
+&nbsp;
+        withdrawMaxLimit = 100_000 ether;
+        withdrawMaxPeriod = 1 days; // 24 hrs
+&nbsp;
+        withdrawAccountLimit = 20_000 ether;
+        withdrawAccountPeriod = 1 days; // 24 hrs
+&nbsp;
+        withdrawClusterLimit = 33_333 ether;
+        withdrawClusterPeriod = 12 hours; // 12 hrs
+        withdrawClusterSize = 10;
+&nbsp;
+        _mint(_initialMintTo, 100_000_000 ether);
+    }
+&nbsp;
+    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
+        address sender = _msgSender();
+        require(_allowTransferFrom(sender), "Not authorized at this time.");
+        _spendAllowance(from, sender, value);
+        _transfer(from, to, value);
+        return true;
+    }
+&nbsp;
+    function _allowTransferFrom(address sender) private view returns (bool) {
+        return block.timestamp &gt;= transferFromUnlockDate ||
+            sender == owner() ||
+            _isTransferFromWhiteListed(sender);
+    }
+&nbsp;
+    function _isTransferFromWhiteListed(address addr) private view returns (bool) {
+        return transferFromWhiteList[addr];
+    }
+&nbsp;
+    function setTransferFromWhiteList(address addr) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        require(block.timestamp &lt; transferFromUnlockDate, "Can no longer add whitelist address");
+        transferFromWhiteList[addr] = true;
+    }
+&nbsp;
+    function removeTransferFromWhiteList(address addr) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        require(block.timestamp &lt; transferFromUnlockDate, "Can no longer remove whitelist address");
+        transferFromWhiteList[addr] = false;
+    }
+&nbsp;
+    function setTransferFromUnlockDate(uint256 value) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(block.timestamp &lt; transferFromUnlockDate, "Can no longer set transfer unlock date");
+        require(value &gt; block.timestamp, "New unlock date must be in the future");
+        transferFromUnlockDate = value;
+    }
+&nbsp;
+    function deposit(uint256 amount) external {
+        require(amount &lt;= balanceOf(msg.sender), "Coiin: Balance too low");
+        _burn(msg.sender, amount);
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawSigner(address _withdrawSigner) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_withdrawSigner != address(0), "Coiin: Invalid Address")</span>;
+        withdrawSigner = _withdrawSigner;
+    }
+&nbsp;
+    function pauseWithdrawals(bool _paused) external onlyRole(PAUSER_ROLE) {
+        withdrawalsPaused = _paused;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawLimits(</span>
+        uint256 _withdrawMaxLimit,
+        uint256 _withdrawMaxPeriod,
+        uint256 _withdrawAccountLimit,
+        uint256 _withdrawAccountPeriod,
+        uint256 _withdrawClusterLimit,
+        uint256 _withdrawClusterPeriod,
+        uint256 _withdrawClusterSize
+    ) external onlyOwner {
+        withdrawMaxLimit = _withdrawMaxLimit;
+        withdrawMaxPeriod = _withdrawMaxPeriod;
+        withdrawAccountLimit = _withdrawAccountLimit;
+        withdrawAccountPeriod = _withdrawAccountPeriod;
+        withdrawClusterLimit = _withdrawClusterLimit;
+        withdrawClusterPeriod = _withdrawClusterPeriod;
+        withdrawClusterSize = _withdrawClusterSize;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawMaxLimits(</span>
+        uint256 _withdrawMaxLimit,
+        uint256 _withdrawMaxPeriod
+    ) external onlyOwner {
+        withdrawMaxLimit = _withdrawMaxLimit;
+        withdrawMaxPeriod = _withdrawMaxPeriod;
+    }
+&nbsp;
+    function setWithdrawAccountLimits(
+        uint256 _withdrawAccountLimit,
+        uint256 _withdrawAccountPeriod
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        withdrawAccountLimit = _withdrawAccountLimit;
+        withdrawAccountPeriod = _withdrawAccountPeriod;
+    }
+&nbsp;
+    function setWithdrawClusterLimits(
+        uint256 _withdrawClusterLimit,
+        uint256 _withdrawClusterPeriod,
+        uint256 _withdrawClusterSize
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        withdrawClusterLimit = _withdrawClusterLimit;
+        withdrawClusterPeriod = _withdrawClusterPeriod;
+        withdrawClusterSize = _withdrawClusterSize;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getWithdrawLimits()</span>
+        public
+        view
+        returns (
+            uint256 _withdrawMaxLimit,
+            uint256 _withdrawMaxPeriod,
+            uint256 _withdrawAccountLimit,
+            uint256 _withdrawAccountPeriod,
+            uint256 _withdrawClusterLimit,
+            uint256 _withdrawClusterPeriod,
+            uint256 _withdrawClusterSize
+        )
+    {
+<span class="cstat-no" title="statement not covered" >        return (</span>
+            withdrawMaxLimit,
+            withdrawMaxPeriod,
+            withdrawAccountLimit,
+            withdrawAccountPeriod,
+            withdrawClusterLimit,
+            withdrawClusterPeriod,
+            withdrawClusterSize
+        );
+    }
+&nbsp;
+    function withdraw(
+        uint256 amount,
+        uint256 expires,
+        uint256 nonce,
+        bytes memory sig
+    ) external {
+        require(!withdrawalsPaused, "Coiin: Contract Paused");
+        require(amount &gt; 0, "Coiin: Zero amount");
+        require(!usedNonces[nonce], "Coiin: Invalid nonce");
+        require(block.timestamp &lt; expires, "Coiin: Expired");
+        checkWithdrawLimits(msg.sender, amount);
+&nbsp;
+        usedNonces[nonce] = true;
+&nbsp;
+        bytes32 message = 
+            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this), block.chainid))
+            .toEthSignedMessageHash();
+        require(message.recover(sig) == withdrawSigner, "Coiin: Invalid Signature");
+&nbsp;
+        enqueue(
+            WithdrawMint({
+                account: msg.sender,
+                timestamp: block.timestamp,
+                amount: amount
+            })
+        );
+        _mint(msg.sender, amount);
+        emit Withdraw(msg.sender, nonce, amount);
+    }
+&nbsp;
+    function rescue(address _token, uint256 amount) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        IERC20(_token).safeTransfer(owner(), amount);
+    }
+&nbsp;
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(UPGRADER_ROLE) {}
+&nbsp;
+    function checkWithdrawLimits(address account, uint256 amount) private {
+        require(
+            amount &lt;= withdrawAccountLimit,
+            "Coiin: Max Withdraw Account Limit"
+        );
+&nbsp;
+        uint256 totalWithdraw = 0;
+        uint256 accWithdraw = 0;
+        uint256 clusterWithdraw = 0;
+        uint256 popCnt = 0;
+&nbsp;
+        for (uint256 i = 0; i &lt; historyLength(); i++) {
+            WithdrawMint memory mint = withdrawMintHistory[first + i];
+&nbsp;
+            if (mint.timestamp &lt; block.timestamp - withdrawMaxPeriod) {
+                popCnt += 1;
+            } else {
+                totalWithdraw = totalWithdraw + mint.amount;
+                if (
+                    isInCluster(first + i) &amp;&amp;
+                    mint.timestamp &gt; block.timestamp - withdrawClusterPeriod
+                ) {
+                    clusterWithdraw = clusterWithdraw + mint.amount;
+                }
+                if (
+                    mint.account == account &amp;&amp;
+                    mint.timestamp &gt; block.timestamp - withdrawAccountPeriod
+                ) {
+                    accWithdraw = accWithdraw + mint.amount;
+                }
+            }
+        }
+        dequeue(popCnt);
+&nbsp;
+        require(
+            totalWithdraw + amount &lt;= withdrawMaxLimit,
+            "Coiin: Max Withdraw Limit"
+        );
+        require(
+            accWithdraw + amount &lt;= withdrawAccountLimit,
+            "Coiin: Max Withdraw Account Limit"
+        );
+        require(
+            clusterWithdraw + amount &lt;= withdrawClusterLimit,
+            "Coiin: Max Withdraw Cluster Limit"
+        );
+    }
+&nbsp;
+    function isInCluster(uint256 _index) private view returns (bool) {
+        if (
+            historyLength() &lt; withdrawClusterSize ||
+            _index &gt;= (last - withdrawClusterSize)
+        ) {
+            return true;
+        }
+        return false;
+    }
+&nbsp;
+    function enqueue(WithdrawMint memory newMint) private {
+        withdrawMintHistory[last] = newMint;
+        last += 1;
+    }
+&nbsp;
+    function dequeue(uint256 _popCnt) private {
+        while (_popCnt &gt; 0) {
+            delete withdrawMintHistory[first];
+            first += 1;
+            _popCnt -= 1;
+        }
+    }
+&nbsp;
+    function historyLength() private view returns (uint256) {
+        return last - first;
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu May 02 2024 20:15:14 GMT+0500 (Pakistan Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
