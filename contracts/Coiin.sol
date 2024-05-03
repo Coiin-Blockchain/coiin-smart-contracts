@@ -40,7 +40,6 @@ contract Coiin is
 
     address public withdrawSigner;
 
-
     uint256 public transferFromUnlockDate;
     mapping(address => bool) public transferFromWhiteList;
 
@@ -54,11 +53,18 @@ contract Coiin is
     uint256 private first;
     uint256 private last;
 
+    modifier onlyMultiSig() {
+        _checkOwner();
+        _;
+    }
+
     event Withdraw(address indexed user, uint256 nonce, uint256 amount);
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
+
     function initialize(
         address _multiSigAddr,
         address _initialMintTo,
@@ -77,7 +83,6 @@ contract Coiin is
 
         transferFromUnlockDate = 1893474000;
         withdrawSigner = _withdrawSigner;
-        
 
         withdrawMaxLimit = 100_000 ether;
         withdrawMaxPeriod = 1 days; // 24 hrs
@@ -92,7 +97,11 @@ contract Coiin is
         _mint(_initialMintTo, 100_000_000 ether);
     }
 
-    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override returns (bool) {
         address sender = _msgSender();
         require(_allowTransferFrom(sender), "Not authorized at this time.");
         _spendAllowance(from, sender, value);
@@ -101,28 +110,45 @@ contract Coiin is
     }
 
     function _allowTransferFrom(address sender) private view returns (bool) {
-        return block.timestamp >= transferFromUnlockDate ||
+        return
+            block.timestamp >= transferFromUnlockDate ||
             sender == owner() ||
             _isTransferFromWhiteListed(sender);
     }
 
-    function _isTransferFromWhiteListed(address addr) private view returns (bool) {
+    function _isTransferFromWhiteListed(address addr)
+        private
+        view
+        returns (bool)
+    {
         return transferFromWhiteList[addr];
     }
 
-    function setTransferFromWhiteList(address addr) external onlyOwner {
-        require(block.timestamp < transferFromUnlockDate, "Can no longer add whitelist address");
+    function setTransferFromWhiteList(address addr) external onlyMultiSig {
+        require(
+            block.timestamp < transferFromUnlockDate,
+            "Can no longer add whitelist address"
+        );
         transferFromWhiteList[addr] = true;
     }
 
-    function removeTransferFromWhiteList(address addr) external onlyOwner {
-        require(block.timestamp < transferFromUnlockDate, "Can no longer remove whitelist address");
+    function removeTransferFromWhiteList(address addr) external onlyMultiSig {
+        require(
+            block.timestamp < transferFromUnlockDate,
+            "Can no longer remove whitelist address"
+        );
         transferFromWhiteList[addr] = false;
     }
 
-    function setTransferFromUnlockDate(uint256 value) external onlyOwner {
-        require(block.timestamp < transferFromUnlockDate, "Can no longer set transfer unlock date");
-        require(value > block.timestamp, "New unlock date must be in the future");
+    function setTransferFromUnlockDate(uint256 value) external onlyMultiSig {
+        require(
+            block.timestamp < transferFromUnlockDate,
+            "Can no longer set transfer unlock date"
+        );
+        require(
+            value > block.timestamp,
+            "New unlock date must be in the future"
+        );
         transferFromUnlockDate = value;
     }
 
@@ -131,7 +157,7 @@ contract Coiin is
         _burn(msg.sender, amount);
     }
 
-    function setWithdrawSigner(address _withdrawSigner) external onlyOwner {
+    function setWithdrawSigner(address _withdrawSigner) external onlyMultiSig {
         require(_withdrawSigner != address(0), "Coiin: Invalid Address");
         withdrawSigner = _withdrawSigner;
     }
@@ -148,7 +174,7 @@ contract Coiin is
         uint256 _withdrawClusterLimit,
         uint256 _withdrawClusterPeriod,
         uint256 _withdrawClusterSize
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         withdrawMaxLimit = _withdrawMaxLimit;
         withdrawMaxPeriod = _withdrawMaxPeriod;
         withdrawAccountLimit = _withdrawAccountLimit;
@@ -161,7 +187,7 @@ contract Coiin is
     function setWithdrawMaxLimits(
         uint256 _withdrawMaxLimit,
         uint256 _withdrawMaxPeriod
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         withdrawMaxLimit = _withdrawMaxLimit;
         withdrawMaxPeriod = _withdrawMaxPeriod;
     }
@@ -169,7 +195,7 @@ contract Coiin is
     function setWithdrawAccountLimits(
         uint256 _withdrawAccountLimit,
         uint256 _withdrawAccountPeriod
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         withdrawAccountLimit = _withdrawAccountLimit;
         withdrawAccountPeriod = _withdrawAccountPeriod;
     }
@@ -178,7 +204,7 @@ contract Coiin is
         uint256 _withdrawClusterLimit,
         uint256 _withdrawClusterPeriod,
         uint256 _withdrawClusterSize
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         withdrawClusterLimit = _withdrawClusterLimit;
         withdrawClusterPeriod = _withdrawClusterPeriod;
         withdrawClusterSize = _withdrawClusterSize;
@@ -222,10 +248,20 @@ contract Coiin is
 
         usedNonces[nonce] = true;
 
-        bytes32 message = 
-            keccak256(abi.encodePacked(msg.sender, amount, expires, nonce, address(this), block.chainid))
-            .toEthSignedMessageHash();
-        require(message.recover(sig) == withdrawSigner, "Coiin: Invalid Signature");
+        bytes32 message = keccak256(
+            abi.encodePacked(
+                msg.sender,
+                amount,
+                expires,
+                nonce,
+                address(this),
+                block.chainid
+            )
+        ).toEthSignedMessageHash();
+        require(
+            message.recover(sig) == withdrawSigner,
+            "Coiin: Invalid Signature"
+        );
 
         enqueue(
             WithdrawMint({
@@ -238,13 +274,15 @@ contract Coiin is
         emit Withdraw(msg.sender, nonce, amount);
     }
 
-    function rescue(address _token, uint256 amount) external onlyOwner {
+    function rescue(address _token, uint256 amount) external onlyMultiSig {
         IERC20(_token).safeTransfer(owner(), amount);
     }
 
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyRole(UPGRADER_ROLE)
+    {}
 
     function checkWithdrawLimits(address account, uint256 amount) private {
         require(
