@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\Mocks\CoiinV2.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">contracts/Mocks/</a> CoiinV2.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">3.13% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>1/32</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/36</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">6.25% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>1/16</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">1.45% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>1/69</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.20;
+import {ERC20Base} from "@thirdweb-dev/contracts/base/ERC20Base.sol";
+// import "./utils/CoiinECDSA.sol";
+import {ECDSA as CoiinECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+// Uncomment this line to use console.log
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+&nbsp;
+import "hardhat/console.sol";
+&nbsp;
+error Coiin__ContractPaused();
+error Coiin__BalanceTooLow();
+error Coiin__ZeroAmount();
+error Coiin__InvalidNonce();
+error Coiin__Expired();
+error Coiin__MaxWithdrawAccountLimit();
+error Coiin__MaxWithdrawLimit();
+error Coiin__MaxWithdrawClusterLimit();
+error Coiin__InvalidSignature();
+error Coiin__OnlyMultisig();
+&nbsp;
+/// @title Coiin Token Contract
+/// @author Coiin
+/// @notice Implements the Coiin BEP20 token
+contract CoiinV2 is
+    UUPSUpgradeable,
+    ERC20PermitUpgradeable,
+    Ownable2StepUpgradeable,
+    AccessControlUpgradeable
+{
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    using CoiinECDSA for bytes32;
+    using MessageHashUtils for bytes32;
+&nbsp;
+    bool public withdrawalsPaused;
+&nbsp;
+    uint256 private withdrawMaxLimit;
+    uint256 private withdrawMaxPeriod; // Seconds
+&nbsp;
+    uint256 private withdrawAccountLimit;
+    uint256 private withdrawAccountPeriod; // Seconds
+&nbsp;
+    uint256 private withdrawClusterLimit;
+&nbsp;
+    uint256 private withdrawClusterPeriod; // Seconds
+    uint256 private withdrawClusterSize;
+&nbsp;
+&nbsp;
+    mapping(uint256 =&gt; bool) usedNonces;
+&nbsp;
+    address public withdrawSigner;
+    uint256 public transferFromUnlockDate;
+    mapping(address =&gt; bool) public transferFromWhiteList;
+&nbsp;
+    struct WithdrawMint {
+        address account;
+        uint256 timestamp;
+        uint256 amount;
+    }
+&nbsp;
+    mapping(uint256 =&gt; WithdrawMint) public withdrawMintHistory;
+    uint256 private first;
+    uint256 private last;
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function initialize(</span>
+        address _multiSigAddr,
+        address _initialMintTo,
+        address _withdrawSigner,
+        string memory _name,
+        string memory _symbol
+    ) external initializer {
+<span class="cstat-no" title="statement not covered" >        __Ownable2Step_init()</span>;
+<span class="cstat-no" title="statement not covered" >        __ERC20_init(_name, _symbol)</span>;
+<span class="cstat-no" title="statement not covered" >        __ERC20Permit_init(_name)</span>;
+<span class="cstat-no" title="statement not covered" >        __AccessControl_init()</span>;
+<span class="cstat-no" title="statement not covered" >        _grantRole(DEFAULT_ADMIN_ROLE, _multiSigAddr)</span>;
+        withdrawSigner = _withdrawSigner;
+&nbsp;
+        withdrawMaxLimit = 100_000 ether;
+        withdrawMaxPeriod = 1 days; // 24 hrs
+&nbsp;
+        withdrawAccountLimit = 20_000 ether;
+        withdrawAccountPeriod = 1 days; // 24 hrs
+&nbsp;
+        withdrawClusterLimit = 33_333 ether;
+        withdrawClusterPeriod = 12 hours; // 12 hrs
+        withdrawClusterSize = 10;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        _mint(_initialMintTo, 100_000_000 ether)</span>;
+    }
+<span class="fstat-no" title="function not covered" >    function deposit(uint256 amount) external {</span>
+<span class="cstat-no" title="statement not covered" >        if (amount &gt; balanceOf(msg.sender)) revert Coiin__BalanceTooLow();</span>
+<span class="cstat-no" title="statement not covered" >        _burn(msg.sender, amount)</span>;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawSigner(address _withdrawSigner) external onlyOwner {</span>
+        withdrawSigner = _withdrawSigner;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function pauseWithdrawals(bool _paused) external onlyRole(PAUSER_ROLE) {</span>
+        withdrawalsPaused = _paused;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawLimits(</span>
+        uint256 _withdrawMaxLimit,
+        uint256 _withdrawMaxPeriod,
+        uint256 _withdrawAccountLimit,
+        uint256 _withdrawAccountPeriod,
+        uint256 _withdrawClusterLimit,
+        uint256 _withdrawClusterPeriod,
+        uint256 _withdrawClusterSize
+    ) external onlyOwner {
+        withdrawMaxLimit = _withdrawMaxLimit;
+        withdrawMaxPeriod = _withdrawMaxPeriod;
+        withdrawAccountLimit = _withdrawAccountLimit;
+        withdrawAccountPeriod = _withdrawAccountPeriod;
+        withdrawClusterLimit = _withdrawClusterLimit;
+        withdrawClusterPeriod = _withdrawClusterPeriod;
+        withdrawClusterSize = _withdrawClusterSize;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawMaxLimits(</span>
+        uint256 _withdrawMaxLimit,
+        uint256 _withdrawMaxPeriod
+    ) external onlyOwner {
+        withdrawMaxLimit = _withdrawMaxLimit;
+        withdrawMaxPeriod = _withdrawMaxPeriod;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawAccountLimits(</span>
+        uint256 _withdrawAccountLimit,
+        uint256 _withdrawAccountPeriod
+    ) external onlyOwner {
+        withdrawAccountLimit = _withdrawAccountLimit;
+        withdrawAccountPeriod = _withdrawAccountPeriod;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setWithdrawClusterLimits(</span>
+        uint256 _withdrawClusterLimit,
+        uint256 _withdrawClusterPeriod,
+        uint256 _withdrawClusterSize
+    ) external onlyOwner {
+        withdrawClusterLimit = _withdrawClusterLimit;
+        withdrawClusterPeriod = _withdrawClusterPeriod;
+        withdrawClusterSize = _withdrawClusterSize;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getWithdrawLimits()</span>
+        public
+        view
+        returns (
+            uint256 _withdrawMaxLimit,
+            uint256 _withdrawMaxPeriod,
+            uint256 _withdrawAccountLimit,
+            uint256 _withdrawAccountPeriod,
+            uint256 _withdrawClusterLimit,
+            uint256 _withdrawClusterPeriod,
+            uint256 _withdrawClusterSize
+        )
+    {
+<span class="cstat-no" title="statement not covered" >        return (</span>
+            withdrawMaxLimit,
+            withdrawMaxPeriod,
+            withdrawAccountLimit,
+            withdrawAccountPeriod,
+            withdrawClusterLimit,
+            withdrawClusterPeriod,
+            withdrawClusterSize
+        );
+    }
+&nbsp;
+    function withdraw(uint256 amount) external {
+        _mint(msg.sender, amount);
+    }
+<span class="fstat-no" title="function not covered" >    function _authorizeUpgrade(</span>
+        address newImplementation
+    ) internal override onlyRole(UPGRADER_ROLE) {}
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function checkWithdrawLimits(address account, uint256 amount) private {</span>
+<span class="cstat-no" title="statement not covered" >        if (amount &gt; withdrawAccountLimit)</span>
+            revert Coiin__MaxWithdrawAccountLimit();
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        uint256 totalWithdraw = 0;</span>
+<span class="cstat-no" title="statement not covered" >        uint256 accWithdraw = 0;</span>
+<span class="cstat-no" title="statement not covered" >        uint256 clusterWithdraw = 0;</span>
+<span class="cstat-no" title="statement not covered" >        uint popCnt = 0;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        for (uint i = 0; i &lt; historyLength(); i++) {</span>
+<span class="cstat-no" title="statement not covered" >            WithdrawMint memory mint = withdrawMintHistory[first + i];</span>
+&nbsp;
+            // if mint is older than period then increment popCnt for deletion
+<span class="cstat-no" title="statement not covered" >            if (mint.timestamp &lt; block.timestamp - withdrawMaxPeriod) {</span>
+<span class="cstat-no" title="statement not covered" >                console.log("Mint is older than 24 hours: ", i)</span>;
+                popCnt += 1;
+            } else {
+                // otherwise include mint in calculations
+                totalWithdraw = totalWithdraw + mint.amount;
+<span class="cstat-no" title="statement not covered" >                if (</span>
+                    isInCluster(first + i) &amp;&amp;
+                    mint.timestamp &gt; block.timestamp - withdrawClusterPeriod
+                ) {
+                    clusterWithdraw = clusterWithdraw + mint.amount;
+                }
+<span class="cstat-no" title="statement not covered" >                if (</span>
+                    mint.account == account &amp;&amp;
+                    mint.timestamp &gt; block.timestamp - withdrawAccountPeriod
+                ) {
+                    accWithdraw = accWithdraw + mint.amount;
+                }
+            }
+        }
+<span class="cstat-no" title="statement not covered" >        dequeue(popCnt)</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if (totalWithdraw + amount &gt; withdrawMaxLimit)</span>
+            revert Coiin__MaxWithdrawLimit();
+<span class="cstat-no" title="statement not covered" >        if (accWithdraw + amount &gt; withdrawAccountLimit)</span>
+            revert Coiin__MaxWithdrawAccountLimit();
+<span class="cstat-no" title="statement not covered" >        if (clusterWithdraw + amount &gt; withdrawClusterLimit)</span>
+            revert Coiin__MaxWithdrawClusterLimit();
+<span class="cstat-no" title="statement not covered" >        _mint(msg.sender, amount)</span>;
+    }
+<span class="fstat-no" title="function not covered" >    function isInCluster(uint256 _index) private view returns (bool) {</span>
+<span class="cstat-no" title="statement not covered" >        if (</span>
+            historyLength() &lt; withdrawClusterSize ||
+            _index &gt;= (last - withdrawClusterSize)
+        ) {
+<span class="cstat-no" title="statement not covered" >            return true;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+    }
+<span class="fstat-no" title="function not covered" >    function enqueue(WithdrawMint memory newMint) private {</span>
+        withdrawMintHistory[last] = newMint;
+        last += 1;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function dequeue(uint256 _popCnt) private {</span>
+<span class="cstat-no" title="statement not covered" >        while (_popCnt &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >            console.log("Deleting: ", first)</span>;
+            delete withdrawMintHistory[first];
+            first += 1;
+            _popCnt -= 1;
+        }
+    }
+<span class="fstat-no" title="function not covered" >    function historyLength() private view returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return last - first;</span>
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu May 02 2024 20:15:14 GMT+0500 (Pakistan Standard Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

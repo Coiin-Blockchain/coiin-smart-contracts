@@ -1,6 +1,8 @@
 const { ethers, upgrades } = require("hardhat");
 const hre = require("hardhat");
 
+const chainId = 31337;
+
 async function main() {
     const [owner] = await ethers.getSigners();
     const Coiin = await ethers.getContractFactory("Coiin");
@@ -28,8 +30,8 @@ const getSignature = async function (sender, amount, expires, nonce, coiin) {
 
     const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     let message = ethers.solidityPackedKeccak256(
-        ["address", "uint256", "uint256", "uint256", "address"],
-        [sender, amount, expires, nonce, coiin]
+        ["address", "uint256", "uint256", "uint256", "address", "uint"],
+        [sender, amount, expires, nonce, coiin, chainId]
     )
     let sig = await otherAccount.signMessage(ethers.getBytes(message));
     return sig

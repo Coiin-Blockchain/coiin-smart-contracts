@@ -5,14 +5,16 @@ const hre = require("hardhat");
 const {ethers, upgrades } = require("hardhat");
 const { extendConfig } = require("hardhat/config");
 
+const chainId = 31337;
+
 const getSignature = async function (sender, amount, expires, nonce, coiin) {
 
     const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     let message = ethers.solidityPackedKeccak256(
-        ["address", "uint256", "uint256", "uint256", "address"],
-        [sender, amount, expires, nonce, coiin]
+        ["address", "uint256", "uint256", "uint256", "address", "uint256"],
+        [sender, amount, expires, nonce, coiin,chainId]
     )
-    let sig = await signer.signMessage(ethers.getBytes(message));
+    let sig = await signer.signMessage(ethers.getBytes(message), chainId);
     return sig
 
 }
@@ -25,8 +27,8 @@ const getRandomInt = function (min, max) {
 const verifySignature = async function (sender, amount, expires, nonce, coiin, signature) {
     const [ owner, otherAccount, signer, multiSig, mockUser1, mockUser2, mockUser3 ] = await ethers.getSigners();
     let message = ethers.solidityPackedKeccak256(
-        ["address", "uint256", "uint256", "uint256", "address"],
-        [sender, amount, expires, nonce, coiin]
+        ["address", "uint256", "uint256", "uint256", "address", "uint"],
+        [sender, amount, expires, nonce, coiin, chainId]
     )
 
     let messageHash = ethers.hashMessage(ethers.getBytes(message))
