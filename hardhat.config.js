@@ -29,12 +29,12 @@ module.exports = {
     },
     hardhat: {
     },
-    testnet: {
+    bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
       chainId: 97,
       accounts: {mnemonic: mnemonic}
     },
-    mainnet: {
+    bscMainnet: {
       url: "https://bsc-dataseed.bnbchain.org/",
       chainId: 56,
       gasPrice: 20000000000,
@@ -43,6 +43,12 @@ module.exports = {
     baseMainnet: {
       url: "https://mainnet.base.org",
       chainId: 8453,
+      accounts: {mnemonic: mnemonic}
+    },
+    baseSepolia: {
+      url: 'https://sepolia.base.org',
+      chainId: 84532,
+      gasMultiplier: 2,
       accounts: {mnemonic: mnemonic}
     }
   },
@@ -65,8 +71,19 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      bscTestnet: 'RJHIR5WTVDP45AC7GX1CQVMGN95NQCEG1E'
-    }
+      bscTestnet: '',
+      baseSepolia: '',
+      base: ''
+    },
+    customChains: [
+      {
+        network: "baseSepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org/"
+        }
+      }
+    ]
   }
 };
-""

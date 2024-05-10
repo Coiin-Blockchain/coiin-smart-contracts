@@ -1,36 +1,16 @@
-const { ethers, upgrades } = require("hardhat");
+const {ethers, upgrades} = require("hardhat");
 
 async function main() {
-  const [
-    owner,
-    otherAccount,
-    signer,
-    multiSig,
-    mockUser1,
-    mockUser2,
-    mockUser3,
-  ] = await ethers.getSigners();
-  const Coiin = await ethers.getContractFactory("Coiin");
-  const coiin = await upgrades.upgradeProxy(
-    "0x83CACFa3d369973e40651468CA55B3f93eB7C577",
-    Coiin
-  );
-  // const coiin = await upgrades.deployProxy(
-  //     Coiin,
-  //     [
-  //         owner.address,
-  //         owner.address,
-  //         owner.address,
-  //         "CoiinMock",
-  //         "COIIMOCK"
-  //     ],
-  //     { initializer: 'initialize' }
-  // );
-  //await coiin.waitForDeployment();
-  console.log("Deployed Coiin at: ", await coiin.getAddress());
+  const Coiin = await ethers.getContractFactory("CoiinV4");
 
-  // hit test revert
-  // await coiin.throw_revert()
+  const coiin = await upgrades.upgradeProxy(
+      "0x481FE356DF88169f5F38203Dd7f3C67B7559FDa5",
+      Coiin,
+  );
+
+  // await upgrades.forceImport("0x481FE356DF88169f5F38203Dd7f3C67B7559FDa5", Coiin, {});
+
+  console.log("Deployed Coiin at: ", await coiin.getAddress());
 }
 
 main();

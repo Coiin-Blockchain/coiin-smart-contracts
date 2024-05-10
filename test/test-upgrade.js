@@ -35,7 +35,7 @@ describe("Coiin Upgrade", function () {
   describe("After Upgrade", function () {
     it("Should not allow anyone except account having UPGRADER_ROLE to upgrade the contract", async function () {
       const { coiin } = await loadFixture(deployCoiinFixture);
-      const CoiinV2 = await ethers.getContractFactory("CoiinV2");
+      const CoiinV2 = await ethers.getContractFactory("CoiinV3.sol");
       const [
         owner,
         otherAccount,
@@ -58,7 +58,7 @@ describe("Coiin Upgrade", function () {
     });
     it("Should  allow   account having UPGRADER_ROLE to upgrade the contract", async function () {
       const { coiin } = await loadFixture(deployCoiinFixture);
-      const CoiinV2 = await ethers.getContractFactory("CoiinV2");
+      const CoiinV2 = await ethers.getContractFactory("CoiinV3.sol");
       const [
         owner,
         otherAccount,
@@ -78,7 +78,7 @@ describe("Coiin Upgrade", function () {
     });
     it("Does Upgrade", async function () {
       const { coiin } = await loadFixture(deployCoiinFixture);
-      const CoiinV2 = await ethers.getContractFactory("CoiinV2");
+      const CoiinV2 = await ethers.getContractFactory("CoiinV3.sol");
       const [
         owner,
         otherAccount,
