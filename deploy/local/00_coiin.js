@@ -7,15 +7,19 @@ async function main() {
     const coiin = await upgrades.deployProxy(
         Coiin,
         [
-            multiSig.address,
-            owner.address,
-            signer.address,
-            "CoiinAM",
-            "COIINAM"
+            "0x41eDb5445A610dcB86d171C8736fC21ca4870930",
+            "0x41eDb5445A610dcB86d171C8736fC21ca4870930",
+            "0x41eDb5445A610dcB86d171C8736fC21ca4870930",
+            "Coiin",
+            "COIIN"
         ],
         { initializer: 'initialize' }
     );
     await coiin.waitForDeployment();
+
+    const UPGRADER_ROLE = await coiin.UPGRADER_ROLE();
+    await coiin.connect(owner).grantRole(UPGRADER_ROLE, "0x41eDb5445A610dcB86d171C8736fC21ca4870930");
+
     console.log("Deployed Coiin at: ", (await coiin.getAddress()))
 }
 
