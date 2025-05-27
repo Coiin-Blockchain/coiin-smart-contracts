@@ -2,7 +2,7 @@
 
 require("@nomicfoundation/hardhat-toolbox");
 require('@openzeppelin/hardhat-upgrades');
-const { mnemonic } = require('./secrets.json');
+const { mnemonic, infuraApiKey } = require('./secrets.json');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -43,11 +43,18 @@ module.exports = {
     baseMainnet: {
       url: "https://mainnet.base.org",
       chainId: 8453,
+      gasPrice: 20000000000,
       accounts: {mnemonic: mnemonic}
     },
     baseSepolia: {
       url: 'https://sepolia.base.org',
       chainId: 84532,
+      // gasPrice: 10000000000,
+      accounts: {mnemonic: mnemonic}
+    },
+    sepolia: {
+      url: 'https://sepolia.infura.io/v3/'+infuraApiKey,
+      chainId: 11155111,
       gasMultiplier: 2,
       accounts: {mnemonic: mnemonic}
     }
@@ -71,9 +78,10 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      bscTestnet: '',
-      baseSepolia: '',
-      base: ''
+      bscTestnet: 'RJHIR5WTVDP45AC7GX1CQVMGN95NQCEG1E',
+      baseSepolia: '1XSUGT789RPQ7QQCPKUXYMGTS6WTWEWTEI',
+      base: '1XSUGT789RPQ7QQCPKUXYMGTS6WTWEWTEI',
+      sepolia: 'C427GK4CIJCHJ8JUST93RDV8AAU6BDB555'
     },
     customChains: [
       {

@@ -84,7 +84,7 @@ contract CoiinV4 is
         transferFromUnlockDate = 1893474000;
         withdrawSigner = _withdrawSigner;
 
-        withdrawMaxLimit = 100_000 ether;
+        withdrawMaxLimit = 1_000_000 ether;
         withdrawMaxPeriod = 1 days; // 24 hrs
 
         withdrawAccountLimit = 20_000 ether;
